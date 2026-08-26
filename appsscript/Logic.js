@@ -1,4 +1,4 @@
-﻿var COLUMNS = {
+var COLUMNS = {
   DATE: 0,
   FC: 1,
   ERROR_TYPE: 2,
@@ -30,6 +30,18 @@ var FINAL_STATUS_LABEL = {
   RETURN_PARCEL: '택배 회송'
 };
 
+var RETURN_ROUTE = {
+  PARCEL: 'parcel',
+  VENDOR: 'vendor',
+  UNKNOWN: 'unknown'
+};
+
+var ACTION_TYPE = {
+  DISCARD: 'discard',
+  RETURN_VENDOR: 'returnVendor',
+  RETURN_PARCEL: 'returnParcel'
+};
+
 function findMatchingRowIndexes(rows, iprBarcode) {
   var target = String(iprBarcode || '').trim();
   var indexes = [];
@@ -45,9 +57,9 @@ function findMatchingRowIndexes(rows, iprBarcode) {
 
 function determineReturnRoute(methodValue) {
   var value = String(methodValue || '').trim();
-  if (value.indexOf('택배') !== -1) return 'parcel';
-  if (value.indexOf('업체') !== -1) return 'vendor';
-  return 'unknown';
+  if (value.indexOf('택배') !== -1) return RETURN_ROUTE.PARCEL;
+  if (value.indexOf('업체') !== -1) return RETURN_ROUTE.VENDOR;
+  return RETURN_ROUTE.UNKNOWN;
 }
 
 function buildInquiryResult(row) {
@@ -57,7 +69,7 @@ function buildInquiryResult(row) {
     productBarcode: String(row[COLUMNS.PRODUCT_BARCODE] || '').trim(),
     productName: String(row[COLUMNS.PRODUCT_NAME] || '').trim(),
     reportDate: row[COLUMNS.DATE],
-    vendor: row[COLUMNS.VENDOR_NAME],
+    vendor: String(row[COLUMNS.VENDOR_NAME] || '').trim(),
     qty: row[COLUMNS.QTY],
     method: String(row[COLUMNS.METHOD] || '').trim(),
     isOverDPlus6: row[COLUMNS.DPLUS6_CONDITION],
@@ -68,11 +80,11 @@ function buildInquiryResult(row) {
 
 function buildProcessUpdate(actionType, now, extra) {
   extra = extra || {};
-  var statusMap = {
-    discard: FINAL_STATUS_LABEL.DISCARD,
-    returnVendor: FINAL_STATUS_LABEL.RETURN_VENDOR,
-    returnParcel: FINAL_STATUS_LABEL.RETURN_PARCEL
-  };
+  var statusMap = {};
+  statusMap[ACTION_TYPE.DISCARD] = FINAL_STATUS_LABEL.DISCARD;
+  statusMap[ACTION_TYPE.RETURN_VENDOR] = FINAL_STATUS_LABEL.RETURN_VENDOR;
+  statusMap[ACTION_TYPE.RETURN_PARCEL] = FINAL_STATUS_LABEL.RETURN_PARCEL;
+
   var finalStatus = statusMap[actionType];
   if (!finalStatus) {
     throw new Error('Unknown actionType: ' + actionType);
@@ -80,7 +92,7 @@ function buildProcessUpdate(actionType, now, extra) {
   return {
     finalDate: now,
     finalStatus: finalStatus,
-    trackingNo: actionType === 'returnParcel' ? (extra.trackingNo || '') : null
+    trackingNo: actionType === ACTION_TYPE.RETURN_PARCEL ? (extra.trackingNo || '') : null
   };
 }
 
@@ -100,6 +112,8 @@ if (typeof module !== 'undefined') {
   module.exports = {
     COLUMNS: COLUMNS,
     FINAL_STATUS_LABEL: FINAL_STATUS_LABEL,
+    RETURN_ROUTE: RETURN_ROUTE,
+    ACTION_TYPE: ACTION_TYPE,
     findMatchingRowIndexes: findMatchingRowIndexes,
     determineReturnRoute: determineReturnRoute,
     buildInquiryResult: buildInquiryResult,

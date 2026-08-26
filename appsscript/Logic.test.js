@@ -85,6 +85,13 @@ test('buildInquiryResult: 최종처리가 이미 있으면 alreadyProcessed=true
   assert.equal(result.existingStatus, '택배 회송');
 });
 
+test('buildInquiryResult: vendor 필드도 trim 처리된다', () => {
+  const row = [];
+  row[COLUMNS.VENDOR_NAME] = '  테스트벤더  ';
+  const result = buildInquiryResult(row);
+  assert.equal(result.vendor, '테스트벤더');
+});
+
 test('buildProcessUpdate: discard는 D+6 폐기로 기록되고 운송장번호는 null', () => {
   const now = new Date('2026-08-26T09:00:00Z');
   const update = buildProcessUpdate('discard', now);
