@@ -1,0 +1,7 @@
+# 실제 운영 데이터 (로컬 테스트용으로만 보관, 저장소에는 포함하지 않음)
+data.csv
+XRG1 회송리스트 - 시트1.csv
+
+# Node / 빌드 산출물 (향후 사용 시 대비)
+node_modules/
+.clasp.json
