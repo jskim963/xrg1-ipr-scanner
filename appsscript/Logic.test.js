@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { COLUMNS, findMatchingRowIndexes, determineReturnRoute, buildInquiryResult } = require('./Logic.js');
+const { COLUMNS, findMatchingRowIndexes, determineReturnRoute, buildInquiryResult, buildProcessUpdate, buildLogRow, FINAL_STATUS_LABEL } = require('./Logic.js');
 
 test('COLUMNS는 설계 문서의 열 순서(A=0 ... W=22)와 일치한다', () => {
   assert.equal(COLUMNS.IPR, 5);
@@ -83,4 +83,59 @@ test('buildInquiryResult: 최종처리가 이미 있으면 alreadyProcessed=true
   const result = buildInquiryResult(row);
   assert.equal(result.alreadyProcessed, true);
   assert.equal(result.existingStatus, '택배 회송');
+});
+
+test('buildProcessUpdate: discard는 D+6 폐기로 기록되고 운송장번호는 null', () => {
+  const now = new Date('2026-08-26T09:00:00Z');
+  const update = buildProcessUpdate('discard', now);
+  assert.equal(update.finalDate, now);
+  assert.equal(update.finalStatus, 'D+6 폐기');
+  assert.equal(update.trackingNo, null);
+});
+
+test('buildProcessUpdate: returnVendor는 업체 트럭 회송으로 기록된다', () => {
+  const update = buildProcessUpdate('returnVendor', new Date());
+  assert.equal(update.finalStatus, '업체 트럭 회송');
+});
+
+test('buildProcessUpdate: returnParcel은 택배 회송 + 운송장번호를 포함한다', () => {
+  const update = buildProcessUpdate('returnParcel', new Date(), { trackingNo: '1234567890' });
+  assert.equal(update.finalStatus, '택배 회송');
+  assert.equal(update.trackingNo, '1234567890');
+});
+
+test('buildProcessUpdate: 알 수 없는 actionType은 에러를 던진다', () => {
+  assert.throws(() => buildProcessUpdate('nope', new Date()));
+});
+
+test('FINAL_STATUS_LABEL 상수는 시트에 기입할 정확한 문자열을 담는다', () => {
+  assert.equal(FINAL_STATUS_LABEL.DISCARD, 'D+6 폐기');
+  assert.equal(FINAL_STATUS_LABEL.RETURN_VENDOR, '업체 트럭 회송');
+  assert.equal(FINAL_STATUS_LABEL.RETURN_PARCEL, '택배 회송');
+});
+
+test('buildLogRow: log 시트 컬럼 순서(7열)로 배열을 만든다', () => {
+  const row = buildLogRow({
+    timestamp: '2026-08-26T09:00:00Z',
+    statusLabel: 'D+6 폐기',
+    iprBarcode: 'IPR0001',
+    workerName: '홍길동',
+    vfId: 'VF1234',
+    photoUrl: 'https://drive.google.com/x',
+    remark: ''
+  });
+  assert.deepEqual(row, [
+    '2026-08-26T09:00:00Z',
+    'D+6 폐기',
+    'IPR0001',
+    '홍길동',
+    'VF1234',
+    'https://drive.google.com/x',
+    ''
+  ]);
+});
+
+test('buildLogRow: 선택 필드가 없으면 빈 문자열로 채운다', () => {
+  const row = buildLogRow({ timestamp: 't', statusLabel: 's', iprBarcode: 'IPR0001' });
+  assert.deepEqual(row, ['t', 's', 'IPR0001', '', '', '', '']);
 });

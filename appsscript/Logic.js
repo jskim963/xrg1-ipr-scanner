@@ -24,6 +24,12 @@
   TRACKING_NO: 22
 };
 
+var FINAL_STATUS_LABEL = {
+  DISCARD: 'D+6 폐기',
+  RETURN_VENDOR: '업체 트럭 회송',
+  RETURN_PARCEL: '택배 회송'
+};
+
 function findMatchingRowIndexes(rows, iprBarcode) {
   var target = String(iprBarcode || '').trim();
   var indexes = [];
@@ -60,11 +66,44 @@ function buildInquiryResult(row) {
   };
 }
 
+function buildProcessUpdate(actionType, now, extra) {
+  extra = extra || {};
+  var statusMap = {
+    discard: FINAL_STATUS_LABEL.DISCARD,
+    returnVendor: FINAL_STATUS_LABEL.RETURN_VENDOR,
+    returnParcel: FINAL_STATUS_LABEL.RETURN_PARCEL
+  };
+  var finalStatus = statusMap[actionType];
+  if (!finalStatus) {
+    throw new Error('Unknown actionType: ' + actionType);
+  }
+  return {
+    finalDate: now,
+    finalStatus: finalStatus,
+    trackingNo: actionType === 'returnParcel' ? (extra.trackingNo || '') : null
+  };
+}
+
+function buildLogRow(entry) {
+  return [
+    entry.timestamp,
+    entry.statusLabel,
+    entry.iprBarcode,
+    entry.workerName || '',
+    entry.vfId || '',
+    entry.photoUrl || '',
+    entry.remark || ''
+  ];
+}
+
 if (typeof module !== 'undefined') {
   module.exports = {
     COLUMNS: COLUMNS,
+    FINAL_STATUS_LABEL: FINAL_STATUS_LABEL,
     findMatchingRowIndexes: findMatchingRowIndexes,
     determineReturnRoute: determineReturnRoute,
-    buildInquiryResult: buildInquiryResult
+    buildInquiryResult: buildInquiryResult,
+    buildProcessUpdate: buildProcessUpdate,
+    buildLogRow: buildLogRow
   };
 }
