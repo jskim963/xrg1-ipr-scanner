@@ -1,0 +1,7 @@
+{
+  "name": "xrg1-ipr-scanner-appsscript",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}

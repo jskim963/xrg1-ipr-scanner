@@ -1,0 +1,8 @@
+{
+  "name": "xrg1-ipr-scanner-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
