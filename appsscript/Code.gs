@@ -19,6 +19,7 @@ function doPost(e) {
         result = { success: false, error: 'UNKNOWN_ACTION' };
     }
   } catch (err) {
+    Logger.log('doPost error: ' + err + '\n' + (err && err.stack));
     result = { success: false, error: 'SERVER_ERROR', message: String(err) };
   }
   return jsonResponse_(result);
