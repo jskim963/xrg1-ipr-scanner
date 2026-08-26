@@ -37,9 +37,34 @@ function findMatchingRowIndexes(rows, iprBarcode) {
   return indexes;
 }
 
+function determineReturnRoute(methodValue) {
+  var value = String(methodValue || '').trim();
+  if (value.indexOf('택배') !== -1) return 'parcel';
+  if (value.indexOf('업체') !== -1) return 'vendor';
+  return 'unknown';
+}
+
+function buildInquiryResult(row) {
+  var finalStatus = String(row[COLUMNS.FINAL_STATUS] || '').trim();
+  return {
+    iprBarcode: String(row[COLUMNS.IPR] || '').trim(),
+    productBarcode: String(row[COLUMNS.PRODUCT_BARCODE] || '').trim(),
+    productName: String(row[COLUMNS.PRODUCT_NAME] || '').trim(),
+    reportDate: row[COLUMNS.DATE],
+    vendor: row[COLUMNS.VENDOR_NAME],
+    qty: row[COLUMNS.QTY],
+    method: String(row[COLUMNS.METHOD] || '').trim(),
+    isOverDPlus6: row[COLUMNS.DPLUS6_CONDITION],
+    alreadyProcessed: finalStatus !== '',
+    existingStatus: finalStatus !== '' ? finalStatus : null
+  };
+}
+
 if (typeof module !== 'undefined') {
   module.exports = {
     COLUMNS: COLUMNS,
-    findMatchingRowIndexes: findMatchingRowIndexes
+    findMatchingRowIndexes: findMatchingRowIndexes,
+    determineReturnRoute: determineReturnRoute,
+    buildInquiryResult: buildInquiryResult
   };
 }
