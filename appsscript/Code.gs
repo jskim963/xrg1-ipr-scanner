@@ -15,6 +15,12 @@ function doPost(e) {
       case 'processReturnParcel':
         result = handleProcessReturnParcel(payload);
         break;
+      case 'syncDown':
+        result = handleSyncDown(payload);
+        break;
+      case 'syncUp':
+        result = handleSyncUp(payload);
+        break;
       default:
         result = { success: false, error: 'UNKNOWN_ACTION' };
     }
