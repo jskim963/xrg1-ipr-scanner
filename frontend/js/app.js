@@ -18,6 +18,11 @@ var ctx = {
 };
 
 function render() {
+  var existingVideo = root.querySelector('#scanVideo');
+  if (existingVideo) {
+    scanner.stopCameraScan(existingVideo);
+  }
+
   var badge = document.getElementById('workerBadge');
   if (state.worker) {
     badge.textContent = state.worker.name + ' / ' + state.worker.vfId;

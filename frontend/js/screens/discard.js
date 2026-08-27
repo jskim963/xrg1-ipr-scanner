@@ -1,9 +1,11 @@
+import { escapeHtml } from '../lib/html.js';
+
 export function renderDiscard(root, ctx) {
   var inquiry = ctx.state.inquiry;
   root.innerHTML =
     '<div class="card card-discard">' +
     '  <h2>폐기 처리</h2>' +
-    '  <p>IPR: ' + inquiry.iprBarcode + '</p>' +
+    '  <p>IPR: ' + escapeHtml(inquiry.iprBarcode) + '</p>' +
     '  <p>폐기존으로 이동 후 사진을 촬영해주세요.</p>' +
     '  <input id="photoInput" type="file" accept="image/*" capture="environment" />' +
     '  <img id="photoPreview" style="display:none" />' +
@@ -12,13 +14,16 @@ export function renderDiscard(root, ctx) {
     '</div>';
 
   var photoBase64 = null;
+  var latestRequestId = 0;
 
   root.querySelector('#photoInput').addEventListener('change', function (evt) {
     var file = evt.target.files[0];
     if (!file) return;
+    var requestId = ++latestRequestId;
     var reader = new FileReader();
     reader.onload = function () {
       resizeImage_(reader.result, 1280).then(function (resized) {
+        if (requestId !== latestRequestId) return; // 이후에 선택된 사진이 있으면 이 결과는 버린다
         photoBase64 = resized;
         var preview = root.querySelector('#photoPreview');
         preview.src = resized;
