@@ -4,7 +4,8 @@ import {
   buildInquiryPayload,
   buildDiscardPayload,
   buildReturnVendorPayload,
-  buildReturnParcelPayload
+  buildReturnParcelPayload,
+  buildReturnZoneMovePayload
 } from './api-payloads.js';
 
 test('buildInquiryPayload', () => {
@@ -36,6 +37,15 @@ test('buildReturnParcelPayload', () => {
     action: 'processReturnParcel',
     iprBarcode: 'IPR1',
     trackingNo: '999888777',
+    worker: worker
+  });
+});
+
+test('buildReturnZoneMovePayload', () => {
+  const worker = { name: '홍길동', vfId: 'VF1' };
+  assert.deepEqual(buildReturnZoneMovePayload('IPR1', worker), {
+    action: 'processReturnZoneMove',
+    iprBarcode: 'IPR1',
     worker: worker
   });
 });

@@ -13,3 +13,7 @@ export function buildReturnVendorPayload(iprBarcode, worker) {
 export function buildReturnParcelPayload(iprBarcode, trackingNo, worker) {
   return { action: 'processReturnParcel', iprBarcode: iprBarcode, trackingNo: trackingNo, worker: worker };
 }
+
+export function buildReturnZoneMovePayload(iprBarcode, worker) {
+  return { action: 'processReturnZoneMove', iprBarcode: iprBarcode, worker: worker };
+}
