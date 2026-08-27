@@ -1,5 +1,5 @@
 import { attachHidScanner } from '../scanner.js';
-import { formatDateDisplay, formatDPlus6Badge, formatMethodLabel } from '../lib/format.js';
+import { formatDateDisplay, formatDPlus6Badge, formatMethodLabel, splitBarcodeSuffix } from '../lib/format.js';
 import { escapeHtml } from '../lib/html.js';
 
 export function renderScan(root, ctx) {
@@ -115,10 +115,12 @@ function renderInquiryCard_(inquiry) {
   if (inquiry.duplicate) {
     return '<div class="card card-danger">중복 IPR바코드가 감지되었습니다. 담당자에게 문의해주세요.</div>';
   }
+  var barcodeParts = splitBarcodeSuffix(inquiry.productBarcode, 4);
   return (
     '<div class="card card-inquiry">' +
     (inquiry.alreadyProcessed ? '<div class="badge badge-warning">이미 처리된 건입니다 (' + escapeHtml(inquiry.existingStatus) + ')</div>' : '') +
-    '<div class="field"><span>상품바코드</span><strong>' + escapeHtml(inquiry.productBarcode) + '</strong></div>' +
+    '<div class="field"><span>IPR바코드</span><strong>' + escapeHtml(inquiry.iprBarcode) + '</strong></div>' +
+    '<div class="field"><span>상품바코드</span><strong>' + escapeHtml(barcodeParts.prefix) + '<span class="barcode-highlight">' + escapeHtml(barcodeParts.suffix) + '</span></strong></div>' +
     '<div class="field"><span>상품명</span><strong>' + escapeHtml(inquiry.productName) + '</strong></div>' +
     '<div class="field"><span>오류신고일</span><strong>' + escapeHtml(formatDateDisplay(inquiry.reportDate)) + '</strong></div>' +
     '<div class="field"><span>벤더명</span><strong>' + escapeHtml(inquiry.vendor) + '</strong></div>' +
