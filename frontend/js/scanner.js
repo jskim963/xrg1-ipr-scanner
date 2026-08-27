@@ -12,6 +12,10 @@ export function attachHidScanner(inputEl, onScan) {
   inputEl.focus();
 }
 
+// 파일럿 범위 내 의도된 선택: BarcodeDetector(Chrome/Android — PDA 및 대부분의 사용자 경로)는
+// 이 함수를 전혀 거치지 않는다. ZXing은 비Chromium 브라우저(iOS Safari 등) 전용 폴백이며,
+// 무결성 해시(SRI)나 로컬 번들링 없이 공개 CDN에서 로드한다 — 네트워크 제한 환경이나 CDN 장애 시
+// 해당 브라우저에서만 카메라 스캔이 동작하지 않을 수 있다. 파일럿 단계에서는 허용 가능한 리스크로 판단.
 function loadZXing_() {
   return new Promise(function (resolve, reject) {
     if (window.ZXing) return resolve(window.ZXing);
@@ -24,7 +28,13 @@ function loadZXing_() {
 }
 
 function startBarcodeDetectorScan_(videoEl, onScan, onError) {
-  var detector = new window.BarcodeDetector();
+  var detector;
+  try {
+    detector = new window.BarcodeDetector();
+  } catch (err) {
+    onError(err);
+    return;
+  }
   navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
     .then(function (stream) {
       videoEl.srcObject = stream;
