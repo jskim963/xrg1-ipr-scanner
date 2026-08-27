@@ -3,7 +3,7 @@ export var SCREEN = {
   SCAN: 'SCAN',
   DISCARD_PHOTO: 'DISCARD_PHOTO',
   RETURN_METHOD_CHOICE: 'RETURN_METHOD_CHOICE',
-  RETURN_VENDOR_CONFIRM: 'RETURN_VENDOR_CONFIRM',
+  RETURN_VENDOR_CHOICE: 'RETURN_VENDOR_CHOICE',
   RETURN_PARCEL_SCAN: 'RETURN_PARCEL_SCAN'
 };
 
@@ -23,7 +23,7 @@ export function reduce(state, event) {
       return Object.assign({}, state, { screen: SCREEN.RETURN_METHOD_CHOICE });
     case 'CHOOSE_RETURN_METHOD':
       return Object.assign({}, state, {
-        screen: event.route === 'parcel' ? SCREEN.RETURN_PARCEL_SCAN : SCREEN.RETURN_VENDOR_CONFIRM
+        screen: event.route === 'parcel' ? SCREEN.RETURN_PARCEL_SCAN : SCREEN.RETURN_VENDOR_CHOICE
       });
     case 'PROCESS_SUCCESS':
       return Object.assign({}, state, { screen: SCREEN.SCAN, inquiry: null, message: { type: 'success', text: event.text } });
@@ -33,6 +33,8 @@ export function reduce(state, event) {
       return Object.assign({}, state, { screen: SCREEN.SCAN, inquiry: null, message: null });
     case 'LOGOUT':
       return initialState();
+    case 'GO_BACK':
+      return Object.assign({}, state, { screen: event.screen, message: null });
     default:
       return state;
   }

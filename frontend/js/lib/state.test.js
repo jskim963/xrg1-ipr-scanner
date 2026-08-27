@@ -31,7 +31,7 @@ test('SELECT_RETURN: 회송 방식 선택 화면으로 이동한다', () => {
 
 test('CHOOSE_RETURN_METHOD: route가 parcel이면 택배 스캔 화면, vendor면 업체 확인 화면으로 이동한다', () => {
   assert.equal(reduce(initialState(), { type: 'CHOOSE_RETURN_METHOD', route: 'parcel' }).screen, SCREEN.RETURN_PARCEL_SCAN);
-  assert.equal(reduce(initialState(), { type: 'CHOOSE_RETURN_METHOD', route: 'vendor' }).screen, SCREEN.RETURN_VENDOR_CONFIRM);
+  assert.equal(reduce(initialState(), { type: 'CHOOSE_RETURN_METHOD', route: 'vendor' }).screen, SCREEN.RETURN_VENDOR_CHOICE);
 });
 
 test('PROCESS_SUCCESS: 스캔 화면으로 복귀하고 조회 결과를 비우며 성공 메시지를 남긴다', () => {
@@ -65,4 +65,18 @@ test('LOGOUT: 초기 상태로 완전히 되돌아간다', () => {
 test('알 수 없는 이벤트는 상태를 그대로 반환한다', () => {
   const state = initialState();
   assert.equal(reduce(state, { type: 'NOPE' }), state);
+});
+
+test('GO_BACK: 지정된 화면으로 이동하고 조회 결과는 유지한다', () => {
+  const withInquiry = reduce(initialState(), { type: 'INQUIRY_RESULT', result: { found: true } });
+  const discardScreen = reduce(withInquiry, { type: 'SELECT_DISCARD' });
+  const state = reduce(discardScreen, { type: 'GO_BACK', screen: SCREEN.SCAN });
+  assert.equal(state.screen, SCREEN.SCAN);
+  assert.deepEqual(state.inquiry, { found: true });
+});
+
+test('GO_BACK: 메시지를 비운다', () => {
+  const withMessage = reduce(initialState(), { type: 'PROCESS_ERROR', text: '오류' });
+  const state = reduce(withMessage, { type: 'GO_BACK', screen: SCREEN.SCAN });
+  assert.equal(state.message, null);
 });
