@@ -135,3 +135,7 @@ test('buildLogRow: 선택 필드가 없으면 빈 문자열로 채운다', () =>
   const row = buildLogRow({ timestamp: 't', statusLabel: 's', iprBarcode: 'IPR0001' });
   assert.deepEqual(row, ['t', 's', 'IPR0001', '', '', '', '']);
 });
+
+test('COLUMNS.DUPLICATE_CHECK는 AC열(29번째, 0-based 28)이다', () => {
+  assert.equal(COLUMNS.DUPLICATE_CHECK, 28);
+});
