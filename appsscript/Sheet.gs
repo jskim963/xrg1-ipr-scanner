@@ -58,7 +58,7 @@ function writeProcessResult_(rowIndex, update) {
   }
 }
 
-// "회송존 이동" 처리 전용: U열(Remark 날짜)에 처리일, X열(택배 진행상태 — 이 플로우에서는
+// "회송존 이동" 처리 전용: U열(Remark 날짜)에 처리일, V열(메모 — 이 플로우에서는
 // 재사용)에 '회송존 이동' 문자열을 기입한다. S/T열(최종 처리)은 건드리지 않는다 — 아직
 // 최종 처리가 아닌 중간 상태이기 때문이다.
 function writeStagingResult_(rowIndex, update) {

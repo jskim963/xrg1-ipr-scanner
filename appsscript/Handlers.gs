@@ -195,7 +195,7 @@ function applySyncItem_(item, iprColumn) {
     var stagingUpdate = buildStagingUpdate(timestamp);
     // 회송존 이동은 S/T열(FINAL_STATUS)을 쓰지 않으므로 위 alreadyProcessed 판정으로는
     // "같은 회송존 이동 요청의 재전송"을 걸러낼 수 없다(예: syncUp 응답이 유실되어 클라이언트가
-    // 같은 큐 항목을 다시 보내는 경우). X열이 이미 같은 값이면 재전송으로 보고 다시 쓰거나
+    // 같은 큐 항목을 다시 보내는 경우). V열이 이미 같은 값이면 재전송으로 보고 다시 쓰거나
     // 로그를 또 남기지 않는다.
     var alreadyStaged = String(currentRow[COLUMNS.PROGRESS_STATUS] || '').trim() === stagingUpdate.progressStatus;
     if (!alreadyStaged) {

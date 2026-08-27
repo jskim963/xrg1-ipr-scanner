@@ -140,8 +140,8 @@ test('COLUMNS.DUPLICATE_CHECK는 AC열(29번째, 0-based 28)이다', () => {
   assert.equal(COLUMNS.DUPLICATE_CHECK, 28);
 });
 
-test('COLUMNS.PROGRESS_STATUS는 X열(0-based 23)이다', () => {
-  assert.equal(COLUMNS.PROGRESS_STATUS, 23);
+test('COLUMNS.PROGRESS_STATUS는 V열(0-based 21)이다', () => {
+  assert.equal(COLUMNS.PROGRESS_STATUS, 21);
 });
 
 test('ACTION_TYPE.RETURN_ZONE_MOVE는 processReturnZoneMove이다', () => {
