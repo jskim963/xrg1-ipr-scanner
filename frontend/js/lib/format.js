@@ -19,3 +19,12 @@ export function formatMethodLabel(method) {
   if (value.indexOf('업체') !== -1) return '업체직접회수';
   return value || '미지정';
 }
+
+export function splitBarcodeSuffix(barcode, suffixLength) {
+  var str = String(barcode == null ? '' : barcode);
+  var len = suffixLength || 4;
+  if (str.length <= len) {
+    return { prefix: '', suffix: str };
+  }
+  return { prefix: str.slice(0, str.length - len), suffix: str.slice(str.length - len) };
+}

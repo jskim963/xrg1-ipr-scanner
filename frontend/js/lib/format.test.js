@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatDateDisplay, formatDPlus6Badge, formatMethodLabel } from './format.js';
+import { formatDateDisplay, formatDPlus6Badge, formatMethodLabel, splitBarcodeSuffix } from './format.js';
 
 test('formatDateDisplay: Date 객체는 YYYY-MM-DD로 표시한다', () => {
   assert.equal(formatDateDisplay(new Date('2026-08-10T00:00:00Z')), '2026-08-10');
@@ -25,4 +25,22 @@ test('formatMethodLabel: 택배/업체 문구를 표준 라벨로 정규화한�
   assert.equal(formatMethodLabel('택배'), '택배');
   assert.equal(formatMethodLabel('업체직접회수'), '업체직접회수');
   assert.equal(formatMethodLabel(''), '미지정');
+});
+
+test('splitBarcodeSuffix: 길이가 suffixLength보다 길면 뒤 자리를 분리한다', () => {
+  assert.deepEqual(splitBarcodeSuffix('S0037699586659', 4), { prefix: 'S003769958', suffix: '6659' });
+});
+
+test('splitBarcodeSuffix: suffixLength 생략 시 기본값 4를 사용한다', () => {
+  assert.deepEqual(splitBarcodeSuffix('ABCDEFGH'), { prefix: 'ABCD', suffix: 'EFGH' });
+});
+
+test('splitBarcodeSuffix: 길이가 suffixLength 이하이면 전체를 suffix로 반환한다', () => {
+  assert.deepEqual(splitBarcodeSuffix('AB', 4), { prefix: '', suffix: 'AB' });
+  assert.deepEqual(splitBarcodeSuffix('', 4), { prefix: '', suffix: '' });
+});
+
+test('splitBarcodeSuffix: null/undefined은 빈 문자열로 처리한다', () => {
+  assert.deepEqual(splitBarcodeSuffix(null), { prefix: '', suffix: '' });
+  assert.deepEqual(splitBarcodeSuffix(undefined), { prefix: '', suffix: '' });
 });
