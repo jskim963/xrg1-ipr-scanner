@@ -110,14 +110,21 @@ function handleProcessReturnZoneMove(payload) {
     }
     var now = new Date();
     var update = buildStagingUpdate(now);
-    writeStagingResult_(matches[0], update);
-    appendLogRow_(buildLogRow({
-      timestamp: now,
-      statusLabel: update.progressStatus,
-      iprBarcode: payload.iprBarcode,
-      workerName: payload.worker && payload.worker.name,
-      vfId: payload.worker && payload.worker.vfId
-    }));
+    // syncUp의 applySyncItem_과 동일한 판단 기준을 쓴다 — 같은 건에 회송존 이동을
+    // 두 번 눌러도(온라인에서 실수로 두 번 누르는 경우 포함) 로그가 중복으로 쌓이지
+    // 않게 한다.
+    var currentRow = readFullRow_(matches[0]);
+    var alreadyStaged = String(currentRow[COLUMNS.PROGRESS_STATUS] || '').trim() === update.progressStatus;
+    if (!alreadyStaged) {
+      writeStagingResult_(matches[0], update);
+      appendLogRow_(buildLogRow({
+        timestamp: now,
+        statusLabel: update.progressStatus,
+        iprBarcode: payload.iprBarcode,
+        workerName: payload.worker && payload.worker.name,
+        vfId: payload.worker && payload.worker.vfId
+      }));
+    }
     return { success: true };
   } finally {
     lock.releaseLock();

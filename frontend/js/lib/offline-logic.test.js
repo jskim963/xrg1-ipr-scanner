@@ -34,6 +34,15 @@ test('buildOfflineInquiryResult: 큐가 스냅샷보다 우선한다', () => {
   assert.equal(result.alreadyProcessed, true);
 });
 
+test('buildOfflineInquiryResult: 큐에 회송존 이동만 있으면 여전히 미처리로 취급한다', () => {
+  const snapshot = [{ iprBarcode: 'IPR0004', productName: '회송존 이동 대상', vendor: '벤더', qty: 1, method: '업체직접회수' }];
+  const queued = [{ iprBarcode: 'IPR0004', action: 'processReturnZoneMove' }];
+  const result = buildOfflineInquiryResult(snapshot, queued, 'IPR0004');
+  assert.equal(result.alreadyProcessed, false);
+  assert.equal(result.productName, '회송존 이동 대상');
+  assert.equal(result.offline, true);
+});
+
 test('buildSyncQueueItem: 액션/필드를 그대로 담고 시각을 ISO 문자열로 저장한다', () => {
   const now = new Date('2026-08-27T09:00:00.000Z');
   const worker = { name: '홍길동', vfId: 'VF1' };

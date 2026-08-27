@@ -15,22 +15,34 @@ export function renderReturnVendor(root, ctx) {
     '  <button id="returnVendorBack" class="btn btn-secondary" type="button">뒤로가기</button>' +
     '</div>';
 
-  // 버튼 비활성화 확인을 confirm() 호출보다 먼저 한다: confirm()은 브라우저 메인 스레드를
-  // 막는 동기 호출이라, 빠르게 두 번 누른 두 번째 클릭 이벤트는 confirm()이 닫힐 때까지
-  // 대기했다가 그 다음에 실행된다. 그때 이미 버튼이 disabled인지 먼저 확인해야, 두 번째
-  // 클릭이 또 다른 확인창을 띄우고 두 번째 처리 요청을 중복 발송하는 것을 막을 수 있다.
+  // 이 화면은 버튼이 3개(회송존 이동/회수 완료/뒤로가기)이고 서로 다른 쓰기 동작을 한다.
+  // 하나가 처리 중일 때 다른 버튼을 눌러 두 번째 요청이 동시에 나가면, 같은 건에 서로
+  // 모순되는 값(예: 회송존 이동 + 회수 완료가 둘 다)이 기록되거나, 뒤로가기 후 다른 건을
+  // 처리하는 도중 먼저 보낸 요청이 뒤늦게 성공 화면으로 튕겨버릴 수 있다. 그래서 셋 중
+  // 하나라도 진행 중이면 나머지 버튼도 전부 눌리지 않게 막는다. confirm() 호출보다 먼저
+  // 검사해야 한다 — confirm()은 메인 스레드를 막는 동기 호출이라, 빠르게 두 번 누른 두
+  // 번째 클릭 이벤트는 첫 confirm()이 닫힌 뒤에야 실행되기 때문이다.
+  var actionInFlight = false;
+
+  function setAllButtonsDisabled_(disabled) {
+    root.querySelector('#zoneMoveBtn').disabled = disabled;
+    root.querySelector('#pickupCompleteBtn').disabled = disabled;
+    root.querySelector('#returnVendorBack').disabled = disabled;
+  }
+
   function bindConfirmedAction_(buttonId, confirmMessage, syncFn, successMessage, errorPrefix) {
-    var btn = root.querySelector(buttonId);
-    btn.addEventListener('click', function () {
-      if (btn.disabled) return;
+    root.querySelector(buttonId).addEventListener('click', function () {
+      if (actionInFlight) return;
       if (!window.confirm(confirmMessage)) return;
-      btn.disabled = true;
+      actionInFlight = true;
+      setAllButtonsDisabled_(true);
       syncFn().then(function (res) {
         if (res.success) {
           var suffix = res.offline ? ' (오프라인 처리 — 동기화 대기 중)' : '';
           ctx.dispatch({ type: 'PROCESS_SUCCESS', text: successMessage + suffix });
         } else {
-          btn.disabled = false;
+          actionInFlight = false;
+          setAllButtonsDisabled_(false);
           ctx.dispatch({ type: 'PROCESS_ERROR', text: errorPrefix + (res.error || '') });
         }
       });
@@ -54,6 +66,7 @@ export function renderReturnVendor(root, ctx) {
   );
 
   root.querySelector('#returnVendorBack').addEventListener('click', function () {
+    if (actionInFlight) return;
     ctx.dispatch({ type: 'GO_BACK', screen: SCREEN.RETURN_METHOD_CHOICE });
   });
 }
