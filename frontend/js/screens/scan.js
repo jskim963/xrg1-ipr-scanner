@@ -91,8 +91,15 @@ export function renderScan(root, ctx) {
   }
 }
 
+// 화면이 다시 그려질 때마다 새 요청이 시작되는데, 먼저 시작된 느린 요청이 나중에
+// 끝나면 방금 동기화로 갱신된 최신 값을 오래된 값으로 덮어쓸 수 있다. 매 호출마다
+// 토큰을 새로 발급해, 가장 마지막으로 시작된 요청의 결과만 반영되게 한다.
+var latestPendingCountRequestId_ = 0;
+
 function refreshPendingCount_(root, ctx) {
+  var requestId = ++latestPendingCountRequestId_;
   ctx.sync.getPendingCount().then(function (count) {
+    if (requestId !== latestPendingCountRequestId_) return;
     var el = root.querySelector('#pendingCount');
     if (el) el.textContent = '동기화 대기: ' + count + '건';
   });

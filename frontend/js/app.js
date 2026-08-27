@@ -17,12 +17,6 @@ var ctx = {
   dispatch: function (event) {
     state = reduce(state, event);
     render();
-    if (event.type === 'LOGIN_SUCCESS') {
-      sync.downloadSnapshot().catch(function () {
-        state = reduce(state, { type: 'PROCESS_ERROR', text: '오프라인 데이터 다운로드에 실패했습니다. 온라인 상태에서 다시 로그인해주세요.' });
-        render();
-      });
-    }
   },
   api: api,
   scanner: scanner,
