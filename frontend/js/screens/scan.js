@@ -10,6 +10,10 @@ export function renderScan(root, ctx) {
     '<div class="scan-panel">' +
     '  <div class="scanner-lcd">IPR SCAN LOG&#10;IPR바코드를 스캔해주세요</div>' +
     '  <input id="hidInput" class="hid-input" type="text" autocomplete="off" />' +
+    '  <div class="manual-input-row">' +
+    '    <input id="manualInput" type="text" autocomplete="off" placeholder="IPR바코드 직접 입력" />' +
+    '    <button id="manualSubmit" class="btn btn-secondary" type="button">조회</button>' +
+    '  </div>' +
     '  <button id="cameraBtn" class="btn btn-secondary" type="button">카메라로 스캔</button>' +
     '  <video id="scanVideo" class="scan-video" playsinline muted style="display:none"></video>' +
     (message ? '<p class="msg ' + message.type + '">' + escapeHtml(message.text) + '</p>' : '') +
@@ -18,6 +22,20 @@ export function renderScan(root, ctx) {
 
   var hidInput = root.querySelector('#hidInput');
   attachHidScanner(hidInput, function (value) { handleScan_(value, ctx); });
+
+  var manualInput = root.querySelector('#manualInput');
+  var submitManual = function () {
+    var value = manualInput.value.trim();
+    manualInput.value = '';
+    if (value) handleScan_(value, ctx);
+  };
+  root.querySelector('#manualSubmit').addEventListener('click', submitManual);
+  manualInput.addEventListener('keydown', function (evt) {
+    if (evt.key === 'Enter') {
+      evt.preventDefault();
+      submitManual();
+    }
+  });
 
   root.querySelector('#cameraBtn').addEventListener('click', function () {
     var video = root.querySelector('#scanVideo');

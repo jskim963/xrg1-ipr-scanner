@@ -20,7 +20,11 @@ export function attachHidScanner(inputEl, onScan) {
   if (lastRefocusHandler) {
     document.removeEventListener('click', lastRefocusHandler);
   }
-  lastRefocusHandler = function () {
+  lastRefocusHandler = function (evt) {
+    // 클릭한 대상이 직접 입력/버튼(수동 입력창, 카메라 버튼 등)이면 그쪽 포커스를 그대로 두고,
+    // 빈 화면(카드, 배경 등)을 클릭했을 때만 스캐너 입력창으로 포커스를 되돌린다.
+    var tag = evt.target && evt.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'SELECT') return;
     if (document.activeElement !== inputEl) {
       inputEl.focus();
     }
