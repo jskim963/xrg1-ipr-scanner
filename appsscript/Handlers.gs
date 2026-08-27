@@ -101,7 +101,7 @@ function handleProcessReturnParcel(payload) {
 
 function handleSyncDown(payload) {
   var rows = readUnprocessedSnapshotRows_();
-  var items = [];
+  var candidates = [];
   for (var i = 0; i < rows.length; i++) {
     var ipr = String(rows[i][COLUMNS.IPR] || '').trim();
     var finalStatus = String(rows[i][COLUMNS.FINAL_STATUS] || '').trim();
@@ -112,13 +112,30 @@ function handleSyncDown(payload) {
     }
     delete result.alreadyProcessed;
     delete result.existingStatus;
-    items.push(result);
+    candidates.push(result);
   }
+
+  var countByIpr = {};
+  candidates.forEach(function (item) {
+    countByIpr[item.iprBarcode] = (countByIpr[item.iprBarcode] || 0) + 1;
+  });
+  // 같은 IPR바코드가 미처리 행에 2개 이상 있으면(데이터 중복) 오프라인 스냅샷에서 제외한다.
+  // 온라인 조회는 이런 경우 "중복 IPR바코드 감지"로 처리를 막지만, 오프라인은 사용자에게
+  // 그 자리에서 확인받을 방법이 없으므로 아예 스냅샷에 넣지 않아 "재확인 필요"로 안전하게 처리되게 한다.
+  var items = candidates.filter(function (item) { return countByIpr[item.iprBarcode] === 1; });
+
   return { success: true, items: items };
 }
 
-function applySyncItem_(item) {
-  var iprColumn = readIprColumnValues_();
+function applySyncItem_(item, iprColumn) {
+  var actionType = item.action === 'processDiscard' ? ACTION_TYPE.DISCARD
+    : item.action === 'processReturnVendor' ? ACTION_TYPE.RETURN_VENDOR
+    : item.action === 'processReturnParcel' ? ACTION_TYPE.RETURN_PARCEL
+    : null;
+  if (actionType === null) {
+    return { iprBarcode: item.iprBarcode, status: 'error', message: 'Unknown action: ' + item.action };
+  }
+
   var matches = findMatchingIndexesInColumn(iprColumn, item.iprBarcode);
   if (matches.length !== 1) {
     return { iprBarcode: item.iprBarcode, status: 'not_found' };
@@ -141,9 +158,6 @@ function applySyncItem_(item) {
     return { iprBarcode: item.iprBarcode, status: 'duplicate' };
   }
 
-  var actionType = item.action === 'processDiscard' ? ACTION_TYPE.DISCARD
-    : item.action === 'processReturnVendor' ? ACTION_TYPE.RETURN_VENDOR
-    : ACTION_TYPE.RETURN_PARCEL;
   var photoUrl = '';
   if (actionType === ACTION_TYPE.DISCARD && item.photoBase64) {
     photoUrl = uploadPhoto_(item.photoBase64, 'discard_' + item.iprBarcode + '_' + timestamp.getTime());
@@ -169,9 +183,14 @@ function handleSyncUp(payload) {
   lock.waitLock(10000);
   try {
     var items = payload.items || [];
+    var iprColumn = readIprColumnValues_();
     var results = [];
     for (var i = 0; i < items.length; i++) {
-      results.push(applySyncItem_(items[i]));
+      try {
+        results.push(applySyncItem_(items[i], iprColumn));
+      } catch (err) {
+        results.push({ iprBarcode: items[i].iprBarcode, status: 'error', message: String(err) });
+      }
     }
     return { success: true, results: results };
   } finally {
