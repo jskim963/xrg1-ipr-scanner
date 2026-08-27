@@ -25,3 +25,9 @@ export function processReturnVendor(iprBarcode, worker) {
 export function processReturnParcel(iprBarcode, trackingNo, worker) {
   return callApi('processReturnParcel', buildReturnParcelPayload(iprBarcode, trackingNo, worker));
 }
+export function syncDown() {
+  return callApi('syncDown', {});
+}
+export function syncUp(items) {
+  return callApi('syncUp', { items: items });
+}
