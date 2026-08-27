@@ -42,12 +42,12 @@ var ACTION_TYPE = {
   RETURN_PARCEL: 'returnParcel'
 };
 
-function findMatchingRowIndexes(rows, iprBarcode) {
+function findMatchingIndexesInColumn(columnValues, iprBarcode) {
   var target = String(iprBarcode || '').trim();
   var indexes = [];
   if (target === '') return indexes;
-  for (var i = 0; i < rows.length; i++) {
-    var value = String(rows[i][COLUMNS.IPR] || '').trim();
+  for (var i = 0; i < columnValues.length; i++) {
+    var value = String(columnValues[i] || '').trim();
     if (value !== '' && value === target) {
       indexes.push(i);
     }
@@ -114,7 +114,7 @@ if (typeof module !== 'undefined') {
     FINAL_STATUS_LABEL: FINAL_STATUS_LABEL,
     RETURN_ROUTE: RETURN_ROUTE,
     ACTION_TYPE: ACTION_TYPE,
-    findMatchingRowIndexes: findMatchingRowIndexes,
+    findMatchingIndexesInColumn: findMatchingIndexesInColumn,
     determineReturnRoute: determineReturnRoute,
     buildInquiryResult: buildInquiryResult,
     buildProcessUpdate: buildProcessUpdate,

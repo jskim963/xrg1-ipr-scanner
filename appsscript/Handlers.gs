@@ -3,15 +3,15 @@ function jsonResponse_(obj) {
 }
 
 function handleInquiry(payload) {
-  var rows = readReturnListRows_();
-  var matches = findMatchingRowIndexes(rows, payload.iprBarcode);
+  var iprColumn = readIprColumnValues_();
+  var matches = findMatchingIndexesInColumn(iprColumn, payload.iprBarcode);
   if (matches.length === 0) {
     return { success: true, found: false };
   }
   if (matches.length > 1) {
     return { success: true, found: true, duplicate: true };
   }
-  var result = buildInquiryResult(rows[matches[0]]);
+  var result = buildInquiryResult(readFullRow_(matches[0]));
   result.success = true;
   result.found = true;
   result.duplicate = false;
@@ -25,8 +25,8 @@ function handleProcessDiscard(payload) {
   var lock = LockService.getScriptLock();
   lock.waitLock(10000); // 10초 대기
   try {
-    var rows = readReturnListRows_();
-    var matches = findMatchingRowIndexes(rows, payload.iprBarcode);
+    var iprColumn = readIprColumnValues_();
+    var matches = findMatchingIndexesInColumn(iprColumn, payload.iprBarcode);
     if (matches.length !== 1) {
       return { success: false, error: matches.length === 0 ? 'NOT_FOUND' : 'DUPLICATE' };
     }
@@ -52,12 +52,12 @@ function handleProcessReturnVendor(payload) {
   var lock = LockService.getScriptLock();
   lock.waitLock(10000); // 10초 대기
   try {
-    var rows = readReturnListRows_();
-    var matches = findMatchingRowIndexes(rows, payload.iprBarcode);
+    var iprColumn = readIprColumnValues_();
+    var matches = findMatchingIndexesInColumn(iprColumn, payload.iprBarcode);
     if (matches.length !== 1) {
       return { success: false, error: matches.length === 0 ? 'NOT_FOUND' : 'DUPLICATE' };
     }
-    var matchedRow = rows[matches[0]];
+    var matchedRow = readFullRow_(matches[0]);
     if (determineReturnRoute(matchedRow[COLUMNS.METHOD]) !== RETURN_ROUTE.VENDOR) {
       return { success: false, error: 'ROUTE_MISMATCH' };
     }
@@ -81,12 +81,12 @@ function handleProcessReturnParcel(payload) {
   var lock = LockService.getScriptLock();
   lock.waitLock(10000); // 10초 대기
   try {
-    var rows = readReturnListRows_();
-    var matches = findMatchingRowIndexes(rows, payload.iprBarcode);
+    var iprColumn = readIprColumnValues_();
+    var matches = findMatchingIndexesInColumn(iprColumn, payload.iprBarcode);
     if (matches.length !== 1) {
       return { success: false, error: matches.length === 0 ? 'NOT_FOUND' : 'DUPLICATE' };
     }
-    var matchedRow = rows[matches[0]];
+    var matchedRow = readFullRow_(matches[0]);
     if (determineReturnRoute(matchedRow[COLUMNS.METHOD]) !== RETURN_ROUTE.PARCEL) {
       return { success: false, error: 'ROUTE_MISMATCH' };
     }

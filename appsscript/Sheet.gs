@@ -22,12 +22,21 @@ function getLogSheet_() {
   return sheet;
 }
 
-function readReturnListRows_() {
+// IPR(F열) 한 개 열만 읽어서 매칭 행을 찾는다. 시트가 수천 행/수십 열일 때
+// 매 요청마다 전체 행을 통째로 읽으면 응답이 느려지므로, 매칭 단계는 이 얇은
+// 열 하나만 읽고, 실제로 매칭된 행 하나만 readFullRow_()로 나머지 값을 가져온다.
+function readIprColumnValues_() {
   var sheet = getReturnListSheet_();
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
+  var values = sheet.getRange(2, COLUMNS.IPR + 1, lastRow - 1, 1).getValues();
+  return values.map(function (row) { return row[0]; });
+}
+
+function readFullRow_(rowIndex) {
+  var sheet = getReturnListSheet_();
   var lastCol = sheet.getLastColumn();
-  return sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  return sheet.getRange(rowIndex + 2, 1, 1, lastCol).getValues()[0];
 }
 
 function writeProcessResult_(rowIndex, update) {
