@@ -25,6 +25,20 @@ export function mockCall(action, payload) {
         resolve(row ? Object.assign({ success: true }, row) : { success: true, found: false });
         return;
       }
+      if (action === 'syncDown') {
+        var items = Object.keys(MOCK_ROWS)
+          .map(function (key) { return MOCK_ROWS[key]; })
+          .filter(function (r) { return r.found && !r.duplicate && !r.alreadyProcessed; });
+        resolve({ success: true, items: items });
+        return;
+      }
+      if (action === 'syncUp') {
+        var results = (payload.items || []).map(function (item) {
+          return { iprBarcode: item.iprBarcode, status: 'applied' };
+        });
+        resolve({ success: true, results: results });
+        return;
+      }
       resolve({ success: true });
     }, 200);
   });
