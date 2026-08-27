@@ -10,7 +10,8 @@ export function downloadSnapshot() {
 }
 
 export function inquiry(iprBarcode) {
-  return api.inquiry(iprBarcode).catch(function () {
+  return api.inquiry(iprBarcode).catch(function (err) {
+    console.warn('온라인 조회 실패 - 오프라인 데이터로 대체:', err);
     return Promise.all([db.getSnapshot(), db.getQueueItems()]).then(function (results) {
       return buildOfflineInquiryResult(results[0], results[1], iprBarcode);
     });
@@ -21,23 +22,29 @@ function queueAndSucceed_(action, params) {
   var item = buildSyncQueueItem(action, Object.assign({ now: new Date() }, params));
   return db.addQueueItem(item).then(function () {
     return { success: true, offline: true };
+  }).catch(function (err) {
+    console.warn('오프라인 큐 저장 실패:', err);
+    return { success: false, error: 'OFFLINE_QUEUE_FAILED' };
   });
 }
 
 export function processDiscard(iprBarcode, worker, photoBase64) {
-  return api.processDiscard(iprBarcode, worker, photoBase64).catch(function () {
+  return api.processDiscard(iprBarcode, worker, photoBase64).catch(function (err) {
+    console.warn('온라인 폐기 처리 실패 - 오프라인 큐에 저장:', err);
     return queueAndSucceed_('processDiscard', { iprBarcode: iprBarcode, worker: worker, photoBase64: photoBase64 });
   });
 }
 
 export function processReturnVendor(iprBarcode, worker) {
-  return api.processReturnVendor(iprBarcode, worker).catch(function () {
+  return api.processReturnVendor(iprBarcode, worker).catch(function (err) {
+    console.warn('온라인 업체회송 처리 실패 - 오프라인 큐에 저장:', err);
     return queueAndSucceed_('processReturnVendor', { iprBarcode: iprBarcode, worker: worker });
   });
 }
 
 export function processReturnParcel(iprBarcode, trackingNo, worker) {
-  return api.processReturnParcel(iprBarcode, trackingNo, worker).catch(function () {
+  return api.processReturnParcel(iprBarcode, trackingNo, worker).catch(function (err) {
+    console.warn('온라인 택배회송 처리 실패 - 오프라인 큐에 저장:', err);
     return queueAndSucceed_('processReturnParcel', { iprBarcode: iprBarcode, worker: worker, trackingNo: trackingNo });
   });
 }
