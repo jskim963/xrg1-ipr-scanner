@@ -22,6 +22,7 @@ var COLUMNS = {
   REMARK_DATE: 20,
   MEMO: 21,
   TRACKING_NO: 22,
+  PROGRESS_STATUS: 23,
   DUPLICATE_CHECK: 28
 };
 
@@ -40,7 +41,8 @@ var RETURN_ROUTE = {
 var ACTION_TYPE = {
   DISCARD: 'discard',
   RETURN_VENDOR: 'returnVendor',
-  RETURN_PARCEL: 'returnParcel'
+  RETURN_PARCEL: 'returnParcel',
+  RETURN_ZONE_MOVE: 'processReturnZoneMove'
 };
 
 function findMatchingIndexesInColumn(columnValues, iprBarcode) {
@@ -97,6 +99,10 @@ function buildProcessUpdate(actionType, now, extra) {
   };
 }
 
+function buildStagingUpdate(now) {
+  return { remarkDate: now, progressStatus: '회송존 이동' };
+}
+
 function buildLogRow(entry) {
   return [
     entry.timestamp,
@@ -119,6 +125,7 @@ if (typeof module !== 'undefined') {
     determineReturnRoute: determineReturnRoute,
     buildInquiryResult: buildInquiryResult,
     buildProcessUpdate: buildProcessUpdate,
+    buildStagingUpdate: buildStagingUpdate,
     buildLogRow: buildLogRow
   };
 }

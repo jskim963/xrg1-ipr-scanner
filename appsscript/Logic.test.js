@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { COLUMNS, findMatchingIndexesInColumn, determineReturnRoute, buildInquiryResult, buildProcessUpdate, buildLogRow, FINAL_STATUS_LABEL } = require('./Logic.js');
+const { COLUMNS, findMatchingIndexesInColumn, determineReturnRoute, buildInquiryResult, buildProcessUpdate, buildLogRow, FINAL_STATUS_LABEL, ACTION_TYPE, buildStagingUpdate } = require('./Logic.js');
 
 test('findMatchingIndexesInColumn: 유일한 IPR바코드는 인덱스 1개를 찾는다', () => {
   assert.deepEqual(findMatchingIndexesInColumn(['IPR0001', 'IPR0002', 'IPR0003'], 'IPR0002'), [1]);
@@ -138,4 +138,19 @@ test('buildLogRow: 선택 필드가 없으면 빈 문자열로 채운다', () =>
 
 test('COLUMNS.DUPLICATE_CHECK는 AC열(29번째, 0-based 28)이다', () => {
   assert.equal(COLUMNS.DUPLICATE_CHECK, 28);
+});
+
+test('COLUMNS.PROGRESS_STATUS는 X열(0-based 23)이다', () => {
+  assert.equal(COLUMNS.PROGRESS_STATUS, 23);
+});
+
+test('ACTION_TYPE.RETURN_ZONE_MOVE는 processReturnZoneMove이다', () => {
+  assert.equal(ACTION_TYPE.RETURN_ZONE_MOVE, 'processReturnZoneMove');
+});
+
+test('buildStagingUpdate: 처리일과 회송존 이동 문자열을 담는다', () => {
+  const now = new Date('2026-08-27T09:00:00Z');
+  const update = buildStagingUpdate(now);
+  assert.equal(update.remarkDate, now);
+  assert.equal(update.progressStatus, '회송존 이동');
 });
