@@ -25,9 +25,13 @@ test('SELECT_DISCARD: 폐기 사진 화면으로 이동한다', () => {
   assert.equal(state.screen, SCREEN.DISCARD_PHOTO);
 });
 
-test('SELECT_RETURN: route가 parcel이면 택배 스캔 화면, vendor면 업체 확인 화면으로 이동한다', () => {
-  assert.equal(reduce(initialState(), { type: 'SELECT_RETURN', route: 'parcel' }).screen, SCREEN.RETURN_PARCEL_SCAN);
-  assert.equal(reduce(initialState(), { type: 'SELECT_RETURN', route: 'vendor' }).screen, SCREEN.RETURN_VENDOR_CONFIRM);
+test('SELECT_RETURN: 회송 방식 선택 화면으로 이동한다', () => {
+  assert.equal(reduce(initialState(), { type: 'SELECT_RETURN' }).screen, SCREEN.RETURN_METHOD_CHOICE);
+});
+
+test('CHOOSE_RETURN_METHOD: route가 parcel이면 택배 스캔 화면, vendor면 업체 확인 화면으로 이동한다', () => {
+  assert.equal(reduce(initialState(), { type: 'CHOOSE_RETURN_METHOD', route: 'parcel' }).screen, SCREEN.RETURN_PARCEL_SCAN);
+  assert.equal(reduce(initialState(), { type: 'CHOOSE_RETURN_METHOD', route: 'vendor' }).screen, SCREEN.RETURN_VENDOR_CONFIRM);
 });
 
 test('PROCESS_SUCCESS: 스캔 화면으로 복귀하고 조회 결과를 비우며 성공 메시지를 남긴다', () => {

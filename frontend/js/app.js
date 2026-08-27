@@ -4,6 +4,7 @@ import * as scanner from './scanner.js';
 import { renderLogin } from './screens/login.js';
 import { renderScan } from './screens/scan.js';
 import { renderDiscard } from './screens/discard.js';
+import { renderReturnMethodChoice } from './screens/returnMethodChoice.js';
 import { renderReturnVendor } from './screens/returnVendor.js';
 import { renderReturnParcel } from './screens/returnParcel.js';
 
@@ -35,6 +36,7 @@ function render() {
     case SCREEN.LOGIN: renderLogin(root, ctx); break;
     case SCREEN.SCAN: renderScan(root, ctx); break;
     case SCREEN.DISCARD_PHOTO: renderDiscard(root, ctx); break;
+    case SCREEN.RETURN_METHOD_CHOICE: renderReturnMethodChoice(root, ctx); break;
     case SCREEN.RETURN_VENDOR_CONFIRM: renderReturnVendor(root, ctx); break;
     case SCREEN.RETURN_PARCEL_SCAN: renderReturnParcel(root, ctx); break;
   }

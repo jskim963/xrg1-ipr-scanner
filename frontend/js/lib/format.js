@@ -19,10 +19,3 @@ export function formatMethodLabel(method) {
   if (value.indexOf('업체') !== -1) return '업체직접회수';
   return value || '미지정';
 }
-
-export function determineReturnRoute(methodValue) {
-  var value = String(methodValue || '').trim();
-  if (value.indexOf('택배') !== -1) return 'parcel';
-  if (value.indexOf('업체') !== -1) return 'vendor';
-  return 'unknown';
-}

@@ -1,5 +1,5 @@
 import { attachHidScanner } from '../scanner.js';
-import { formatDateDisplay, formatDPlus6Badge, formatMethodLabel, determineReturnRoute } from '../lib/format.js';
+import { formatDateDisplay, formatDPlus6Badge, formatMethodLabel } from '../lib/format.js';
 import { escapeHtml } from '../lib/html.js';
 
 export function renderScan(root, ctx) {
@@ -54,7 +54,7 @@ export function renderScan(root, ctx) {
       ctx.dispatch({ type: 'SELECT_DISCARD' });
     });
     root.querySelector('#returnBtn').addEventListener('click', function () {
-      ctx.dispatch({ type: 'SELECT_RETURN', route: determineReturnRoute(inquiry.method) });
+      ctx.dispatch({ type: 'SELECT_RETURN' });
     });
   }
 }
