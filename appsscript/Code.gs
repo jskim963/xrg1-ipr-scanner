@@ -15,6 +15,9 @@ function doPost(e) {
       case 'processReturnParcel':
         result = handleProcessReturnParcel(payload);
         break;
+      case 'processReturnZoneMove':
+        result = handleProcessReturnZoneMove(payload);
+        break;
       case 'syncDown':
         result = handleSyncDown(payload);
         break;

@@ -99,6 +99,31 @@ function handleProcessReturnParcel(payload) {
   }
 }
 
+function handleProcessReturnZoneMove(payload) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000); // 10초 대기
+  try {
+    var iprColumn = readIprColumnValues_();
+    var matches = findMatchingIndexesInColumn(iprColumn, payload.iprBarcode);
+    if (matches.length !== 1) {
+      return { success: false, error: matches.length === 0 ? 'NOT_FOUND' : 'DUPLICATE' };
+    }
+    var now = new Date();
+    var update = buildStagingUpdate(now);
+    writeStagingResult_(matches[0], update);
+    appendLogRow_(buildLogRow({
+      timestamp: now,
+      statusLabel: '회송존 이동',
+      iprBarcode: payload.iprBarcode,
+      workerName: payload.worker && payload.worker.name,
+      vfId: payload.worker && payload.worker.vfId
+    }));
+    return { success: true };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function handleSyncDown(payload) {
   var rows = readUnprocessedSnapshotRows_();
   var candidates = [];
@@ -131,6 +156,7 @@ function applySyncItem_(item, iprColumn) {
   var actionType = item.action === 'processDiscard' ? ACTION_TYPE.DISCARD
     : item.action === 'processReturnVendor' ? ACTION_TYPE.RETURN_VENDOR
     : item.action === 'processReturnParcel' ? ACTION_TYPE.RETURN_PARCEL
+    : item.action === 'processReturnZoneMove' ? ACTION_TYPE.RETURN_ZONE_MOVE
     : null;
   if (actionType === null) {
     return { iprBarcode: item.iprBarcode, status: 'error', message: 'Unknown action: ' + item.action };
@@ -156,6 +182,20 @@ function applySyncItem_(item, iprColumn) {
       remark: '오프라인 동기화 중 이미 처리된 건과 중복 - 값 유지되지 않음'
     }));
     return { iprBarcode: item.iprBarcode, status: 'duplicate' };
+  }
+
+  if (actionType === ACTION_TYPE.RETURN_ZONE_MOVE) {
+    var stagingUpdate = buildStagingUpdate(timestamp);
+    writeStagingResult_(rowIndex, stagingUpdate);
+    appendLogRow_(buildLogRow({
+      timestamp: timestamp,
+      statusLabel: '회송존 이동',
+      iprBarcode: item.iprBarcode,
+      workerName: item.worker && item.worker.name,
+      vfId: item.worker && item.worker.vfId,
+      remark: '(오프라인 동기화)'
+    }));
+    return { iprBarcode: item.iprBarcode, status: 'applied' };
   }
 
   var photoUrl = '';
