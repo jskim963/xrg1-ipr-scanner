@@ -1,5 +1,11 @@
 import { normalizeScanValue } from './lib/scan-parser.js';
 
+// 화면을 아무데나 한 번 클릭(터치)하면 이 입력창이 포커스를 잃어 이후 스캔이 전혀 안 들어오는
+// 문제를 막기 위해, 문서 전체 클릭을 감지해 포커스를 되돌린다. 화면이 다시 그려질 때마다
+// attachHidScanner가 새 입력창으로 다시 호출되므로, 이전 화면의 리스너는 반드시 제거해야
+// document에 리스너가 계속 쌓이는 것을 막을 수 있다.
+var lastRefocusHandler = null;
+
 export function attachHidScanner(inputEl, onScan) {
   inputEl.addEventListener('keydown', function (evt) {
     if (evt.key === 'Enter') {
@@ -10,6 +16,16 @@ export function attachHidScanner(inputEl, onScan) {
     }
   });
   inputEl.focus();
+
+  if (lastRefocusHandler) {
+    document.removeEventListener('click', lastRefocusHandler);
+  }
+  lastRefocusHandler = function () {
+    if (document.activeElement !== inputEl) {
+      inputEl.focus();
+    }
+  };
+  document.addEventListener('click', lastRefocusHandler);
 }
 
 // 파일럿 범위 내 의도된 선택: BarcodeDetector(Chrome/Android — PDA 및 대부분의 사용자 경로)는
