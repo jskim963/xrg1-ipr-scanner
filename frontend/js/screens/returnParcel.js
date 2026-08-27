@@ -17,9 +17,10 @@ export function renderReturnParcel(root, ctx) {
   attachHidScanner(trackingInput, function (value) {
     if (submitted) return;
     submitted = true;
-    ctx.api.processReturnParcel(inquiry.iprBarcode, value, ctx.state.worker).then(function (res) {
+    ctx.sync.processReturnParcel(inquiry.iprBarcode, value, ctx.state.worker).then(function (res) {
       if (res.success) {
-        ctx.dispatch({ type: 'PROCESS_SUCCESS', text: '택배 회송 처리가 완료되었습니다. (운송장: ' + value + ')' });
+        var suffix = res.offline ? ' (오프라인 처리 — 동기화 대기 중)' : '';
+        ctx.dispatch({ type: 'PROCESS_SUCCESS', text: '택배 회송 처리가 완료되었습니다. (운송장: ' + value + ')' + suffix });
       } else {
         submitted = false;
         ctx.dispatch({ type: 'PROCESS_ERROR', text: '회송 처리에 실패했습니다: ' + (res.error || '') });

@@ -8,6 +8,11 @@ export function renderScan(root, ctx) {
 
   root.innerHTML =
     '<div class="scan-panel">' +
+    '  <div class="sync-bar">' +
+    '    <span id="pendingCount">동기화 대기: 확인 중...</span>' +
+    '    <button id="refreshSnapshotBtn" class="btn btn-secondary" type="button">데이터 새로고침</button>' +
+    '    <button id="syncNowBtn" class="btn btn-secondary" type="button">지금 동기화</button>' +
+    '  </div>' +
     '  <div class="scanner-lcd">IPR SCAN LOG&#10;IPR바코드를 스캔해주세요</div>' +
     '  <input id="hidInput" class="hid-input" type="text" autocomplete="off" />' +
     '  <div class="manual-input-row">' +
@@ -19,6 +24,33 @@ export function renderScan(root, ctx) {
     (message ? '<p class="msg ' + message.type + '">' + escapeHtml(message.text) + '</p>' : '') +
     (inquiry ? renderInquiryCard_(inquiry) : '') +
     '</div>';
+
+  refreshPendingCount_(root, ctx);
+
+  root.querySelector('#refreshSnapshotBtn').addEventListener('click', function () {
+    var btn = root.querySelector('#refreshSnapshotBtn');
+    btn.disabled = true;
+    ctx.sync.downloadSnapshot().then(function () {
+      ctx.dispatch({ type: 'PROCESS_SUCCESS', text: '오프라인 데이터를 새로고침했습니다.' });
+    }).catch(function () {
+      btn.disabled = false;
+      ctx.dispatch({ type: 'PROCESS_ERROR', text: '데이터 새로고침에 실패했습니다. 온라인 상태를 확인해주세요.' });
+    });
+  });
+
+  root.querySelector('#syncNowBtn').addEventListener('click', function () {
+    var btn = root.querySelector('#syncNowBtn');
+    btn.disabled = true;
+    ctx.sync.syncNow().then(function (summary) {
+      ctx.dispatch({
+        type: 'PROCESS_SUCCESS',
+        text: '동기화 완료: 반영 ' + summary.appliedCount + '건, 중복 ' + summary.duplicateCount + '건, 미확인 ' + summary.notFoundCount + '건'
+      });
+    }).catch(function () {
+      btn.disabled = false;
+      ctx.dispatch({ type: 'PROCESS_ERROR', text: '동기화에 실패했습니다. 온라인 상태를 확인해주세요.' });
+    });
+  });
 
   var hidInput = root.querySelector('#hidInput');
   attachHidScanner(hidInput, function (value) { handleScan_(value, ctx); });
@@ -59,7 +91,17 @@ export function renderScan(root, ctx) {
   }
 }
 
+function refreshPendingCount_(root, ctx) {
+  ctx.sync.getPendingCount().then(function (count) {
+    var el = root.querySelector('#pendingCount');
+    if (el) el.textContent = '동기화 대기: ' + count + '건';
+  });
+}
+
 function renderInquiryCard_(inquiry) {
+  if (inquiry.offlineUnknown) {
+    return '<div class="card card-danger">재확인 필요(오프라인 상태) — 온라인 연결 후 다시 확인해주세요.</div>';
+  }
   if (!inquiry.found) {
     return '<div class="card card-danger">미등록 IPR바코드입니다.</div>';
   }
@@ -85,7 +127,7 @@ function renderInquiryCard_(inquiry) {
 }
 
 function handleScan_(value, ctx) {
-  ctx.api.inquiry(value).then(function (res) {
+  ctx.sync.inquiry(value).then(function (res) {
     if (!res.success) {
       ctx.dispatch({ type: 'PROCESS_ERROR', text: '조회 중 오류가 발생했습니다.' });
       return;

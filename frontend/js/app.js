@@ -1,6 +1,7 @@
 import { initialState, reduce, SCREEN } from './lib/state.js';
 import * as api from './api.js';
 import * as scanner from './scanner.js';
+import * as sync from './sync.js';
 import { renderLogin } from './screens/login.js';
 import { renderScan } from './screens/scan.js';
 import { renderDiscard } from './screens/discard.js';
@@ -13,9 +14,19 @@ var root = document.getElementById('app');
 
 var ctx = {
   get state() { return state; },
-  dispatch: function (event) { state = reduce(state, event); render(); },
+  dispatch: function (event) {
+    state = reduce(state, event);
+    render();
+    if (event.type === 'LOGIN_SUCCESS') {
+      sync.downloadSnapshot().catch(function () {
+        state = reduce(state, { type: 'PROCESS_ERROR', text: '오프라인 데이터 다운로드에 실패했습니다. 온라인 상태에서 다시 로그인해주세요.' });
+        render();
+      });
+    }
+  },
   api: api,
-  scanner: scanner
+  scanner: scanner,
+  sync: sync
 };
 
 function render() {

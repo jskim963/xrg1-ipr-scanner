@@ -36,9 +36,10 @@ export function renderDiscard(root, ctx) {
 
   root.querySelector('#discardComplete').addEventListener('click', function () {
     root.querySelector('#discardComplete').disabled = true;
-    ctx.api.processDiscard(inquiry.iprBarcode, ctx.state.worker, photoBase64).then(function (res) {
+    ctx.sync.processDiscard(inquiry.iprBarcode, ctx.state.worker, photoBase64).then(function (res) {
       if (res.success) {
-        ctx.dispatch({ type: 'PROCESS_SUCCESS', text: 'D+6 폐기 처리가 완료되었습니다.' });
+        var suffix = res.offline ? ' (오프라인 처리 — 동기화 대기 중)' : '';
+        ctx.dispatch({ type: 'PROCESS_SUCCESS', text: 'D+6 폐기 처리가 완료되었습니다.' + suffix });
       } else {
         root.querySelector('#discardComplete').disabled = false;
         ctx.dispatch({ type: 'PROCESS_ERROR', text: '폐기 처리에 실패했습니다: ' + (res.error || '') });

@@ -13,9 +13,10 @@ export function renderReturnVendor(root, ctx) {
 
   root.querySelector('#returnVendorComplete').addEventListener('click', function () {
     root.querySelector('#returnVendorComplete').disabled = true;
-    ctx.api.processReturnVendor(inquiry.iprBarcode, ctx.state.worker).then(function (res) {
+    ctx.sync.processReturnVendor(inquiry.iprBarcode, ctx.state.worker).then(function (res) {
       if (res.success) {
-        ctx.dispatch({ type: 'PROCESS_SUCCESS', text: '업체 트럭 회송 처리가 완료되었습니다.' });
+        var suffix = res.offline ? ' (오프라인 처리 — 동기화 대기 중)' : '';
+        ctx.dispatch({ type: 'PROCESS_SUCCESS', text: '업체 트럭 회송 처리가 완료되었습니다.' + suffix });
       } else {
         root.querySelector('#returnVendorComplete').disabled = false;
         ctx.dispatch({ type: 'PROCESS_ERROR', text: '회송 처리에 실패했습니다: ' + (res.error || '') });
