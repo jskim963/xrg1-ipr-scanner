@@ -42,7 +42,7 @@ function render() {
     case SCREEN.SCAN: renderScan(root, ctx); break;
     case SCREEN.DISCARD_PHOTO: renderDiscard(root, ctx); break;
     case SCREEN.RETURN_METHOD_CHOICE: renderReturnMethodChoice(root, ctx); break;
-    case SCREEN.RETURN_VENDOR_CONFIRM: renderReturnVendor(root, ctx); break;
+    case SCREEN.RETURN_VENDOR_CHOICE: renderReturnVendor(root, ctx); break;
     case SCREEN.RETURN_PARCEL_SCAN: renderReturnParcel(root, ctx); break;
   }
 }
