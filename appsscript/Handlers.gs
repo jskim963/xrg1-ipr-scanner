@@ -113,7 +113,7 @@ function handleProcessReturnZoneMove(payload) {
     writeStagingResult_(matches[0], update);
     appendLogRow_(buildLogRow({
       timestamp: now,
-      statusLabel: '회송존 이동',
+      statusLabel: update.progressStatus,
       iprBarcode: payload.iprBarcode,
       workerName: payload.worker && payload.worker.name,
       vfId: payload.worker && payload.worker.vfId
@@ -186,15 +186,22 @@ function applySyncItem_(item, iprColumn) {
 
   if (actionType === ACTION_TYPE.RETURN_ZONE_MOVE) {
     var stagingUpdate = buildStagingUpdate(timestamp);
-    writeStagingResult_(rowIndex, stagingUpdate);
-    appendLogRow_(buildLogRow({
-      timestamp: timestamp,
-      statusLabel: '회송존 이동',
-      iprBarcode: item.iprBarcode,
-      workerName: item.worker && item.worker.name,
-      vfId: item.worker && item.worker.vfId,
-      remark: '(오프라인 동기화)'
-    }));
+    // 회송존 이동은 S/T열(FINAL_STATUS)을 쓰지 않으므로 위 alreadyProcessed 판정으로는
+    // "같은 회송존 이동 요청의 재전송"을 걸러낼 수 없다(예: syncUp 응답이 유실되어 클라이언트가
+    // 같은 큐 항목을 다시 보내는 경우). X열이 이미 같은 값이면 재전송으로 보고 다시 쓰거나
+    // 로그를 또 남기지 않는다.
+    var alreadyStaged = String(currentRow[COLUMNS.PROGRESS_STATUS] || '').trim() === stagingUpdate.progressStatus;
+    if (!alreadyStaged) {
+      writeStagingResult_(rowIndex, stagingUpdate);
+      appendLogRow_(buildLogRow({
+        timestamp: timestamp,
+        statusLabel: stagingUpdate.progressStatus,
+        iprBarcode: item.iprBarcode,
+        workerName: item.worker && item.worker.name,
+        vfId: item.worker && item.worker.vfId,
+        remark: '(오프라인 동기화)'
+      }));
+    }
     return { iprBarcode: item.iprBarcode, status: 'applied' };
   }
 
