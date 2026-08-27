@@ -1,0 +1,11 @@
+{
+  "name": "XRG1 IPR 스캐너",
+  "short_name": "IPR스캐너",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#EEF0F3",
+  "theme_color": "#E6002D",
+  "icons": [
+    { "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
