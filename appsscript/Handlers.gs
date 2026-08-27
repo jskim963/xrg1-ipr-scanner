@@ -57,10 +57,6 @@ function handleProcessReturnVendor(payload) {
     if (matches.length !== 1) {
       return { success: false, error: matches.length === 0 ? 'NOT_FOUND' : 'DUPLICATE' };
     }
-    var matchedRow = readFullRow_(matches[0]);
-    if (determineReturnRoute(matchedRow[COLUMNS.METHOD]) !== RETURN_ROUTE.VENDOR) {
-      return { success: false, error: 'ROUTE_MISMATCH' };
-    }
     var now = new Date();
     var update = buildProcessUpdate(ACTION_TYPE.RETURN_VENDOR, now);
     writeProcessResult_(matches[0], update);
@@ -85,10 +81,6 @@ function handleProcessReturnParcel(payload) {
     var matches = findMatchingIndexesInColumn(iprColumn, payload.iprBarcode);
     if (matches.length !== 1) {
       return { success: false, error: matches.length === 0 ? 'NOT_FOUND' : 'DUPLICATE' };
-    }
-    var matchedRow = readFullRow_(matches[0]);
-    if (determineReturnRoute(matchedRow[COLUMNS.METHOD]) !== RETURN_ROUTE.PARCEL) {
-      return { success: false, error: 'ROUTE_MISMATCH' };
     }
     var now = new Date();
     var update = buildProcessUpdate(ACTION_TYPE.RETURN_PARCEL, now, { trackingNo: payload.trackingNo });
