@@ -44,7 +44,7 @@ export function renderScan(root, ctx) {
     ctx.sync.syncNow().then(function (summary) {
       ctx.dispatch({
         type: 'PROCESS_SUCCESS',
-        text: '동기화 완료: 반영 ' + summary.appliedCount + '건, 중복 ' + summary.duplicateCount + '건, 미확인 ' + summary.notFoundCount + '건'
+        text: '동기화 완료: 반영 ' + summary.appliedCount + '건, 중복 ' + summary.duplicateCount + '건, 미확인 ' + summary.notFoundCount + '건, 오류(재시도 예정) ' + summary.errorCount + '건'
       });
     }).catch(function () {
       btn.disabled = false;

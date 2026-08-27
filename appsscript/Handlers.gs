@@ -179,21 +179,24 @@ function applySyncItem_(item, iprColumn) {
 }
 
 function handleSyncUp(payload) {
-  var lock = LockService.getScriptLock();
-  lock.waitLock(10000);
-  try {
-    var items = payload.items || [];
-    var iprColumn = readIprColumnValues_();
-    var results = [];
-    for (var i = 0; i < items.length; i++) {
-      try {
-        results.push(applySyncItem_(items[i], iprColumn));
-      } catch (err) {
-        results.push({ iprBarcode: items[i].iprBarcode, status: 'error', message: String(err) });
-      }
+  var items = payload.items || [];
+  var iprColumn = readIprColumnValues_();
+  var results = [];
+  for (var i = 0; i < items.length; i++) {
+    var lock = LockService.getScriptLock();
+    try {
+      lock.waitLock(10000);
+    } catch (lockErr) {
+      results.push({ iprBarcode: items[i].iprBarcode, status: 'error', message: 'LOCK_TIMEOUT' });
+      continue;
     }
-    return { success: true, results: results };
-  } finally {
-    lock.releaseLock();
+    try {
+      results.push(applySyncItem_(items[i], iprColumn));
+    } catch (err) {
+      results.push({ iprBarcode: items[i].iprBarcode, status: 'error', message: String(err) });
+    } finally {
+      lock.releaseLock();
+    }
   }
+  return { success: true, results: results };
 }

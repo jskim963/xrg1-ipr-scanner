@@ -77,6 +77,19 @@ export function clearQueue() {
   });
 }
 
+export function replaceQueue(items) {
+  return openDb_().then(function (db) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction(STORE_QUEUE, 'readwrite');
+      var store = tx.objectStore(STORE_QUEUE);
+      store.clear();
+      items.forEach(function (item) { store.put(item); });
+      tx.oncomplete = function () { resolve(); };
+      tx.onerror = function () { reject(tx.error); };
+    });
+  });
+}
+
 export function getQueueCount() {
   return getQueueItems().then(function (items) { return items.length; });
 }

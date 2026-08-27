@@ -60,8 +60,17 @@ export function syncNow() {
     }
     return api.syncUp(items).then(function (res) {
       if (!res.success) throw new Error('동기화 실패');
-      return db.clearQueue().then(function () {
-        return summarizeSyncResults(res.results);
+      var results = res.results || [];
+      var resolvedIprs = {};
+      results.forEach(function (r) {
+        if (r.status === 'applied' || r.status === 'duplicate' || r.status === 'not_found') {
+          resolvedIprs[r.iprBarcode] = true;
+        }
+        // status === 'error'는 큐에 남겨 다음 동기화 시도 때 재시도한다.
+      });
+      var remaining = items.filter(function (item) { return !resolvedIprs[item.iprBarcode]; });
+      return db.replaceQueue(remaining).then(function () {
+        return summarizeSyncResults(results);
       });
     });
   });
