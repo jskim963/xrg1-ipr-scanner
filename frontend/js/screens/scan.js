@@ -12,7 +12,7 @@ export function renderScan(root, ctx) {
     '  <input id="hidInput" class="hid-input" type="text" autocomplete="off" />' +
     '  <button id="cameraBtn" class="btn btn-secondary" type="button">카메라로 스캔</button>' +
     '  <video id="scanVideo" class="scan-video" playsinline muted style="display:none"></video>' +
-    (message ? '<p class="msg ' + message.type + '">' + message.text + '</p>' : '') +
+    (message ? '<p class="msg ' + message.type + '">' + escapeHtml(message.text) + '</p>' : '') +
     (inquiry ? renderInquiryCard_(inquiry) : '') +
     '</div>';
 
