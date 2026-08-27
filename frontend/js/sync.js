@@ -49,6 +49,13 @@ export function processReturnParcel(iprBarcode, trackingNo, worker) {
   });
 }
 
+export function processReturnZoneMove(iprBarcode, worker) {
+  return api.processReturnZoneMove(iprBarcode, worker).catch(function (err) {
+    console.warn('온라인 회송존 이동 처리 실패 - 오프라인 큐에 저장:', err);
+    return queueAndSucceed_('processReturnZoneMove', { iprBarcode: iprBarcode, worker: worker });
+  });
+}
+
 export function getPendingCount() {
   return db.getQueueCount();
 }
