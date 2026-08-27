@@ -1,4 +1,5 @@
 import { escapeHtml } from '../lib/html.js';
+import { SCREEN } from '../lib/state.js';
 
 export function renderReturnMethodChoice(root, ctx) {
   var inquiry = ctx.state.inquiry;
@@ -11,7 +12,7 @@ export function renderReturnMethodChoice(root, ctx) {
     '    <button id="chooseVendor" class="btn btn-return" type="button">업체직접회수</button>' +
     '    <button id="chooseParcel" class="btn btn-return" type="button">택배</button>' +
     '  </div>' +
-    '  <button id="returnMethodCancel" class="btn btn-secondary" type="button">취소</button>' +
+    '  <button id="returnMethodCancel" class="btn btn-secondary" type="button">뒤로가기</button>' +
     '</div>';
 
   root.querySelector('#chooseVendor').addEventListener('click', function () {
@@ -21,6 +22,6 @@ export function renderReturnMethodChoice(root, ctx) {
     ctx.dispatch({ type: 'CHOOSE_RETURN_METHOD', route: 'parcel' });
   });
   root.querySelector('#returnMethodCancel').addEventListener('click', function () {
-    ctx.dispatch({ type: 'RESET_TO_SCAN' });
+    ctx.dispatch({ type: 'GO_BACK', screen: SCREEN.SCAN });
   });
 }

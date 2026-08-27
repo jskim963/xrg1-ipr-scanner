@@ -1,5 +1,6 @@
 import { attachHidScanner } from '../scanner.js';
 import { escapeHtml } from '../lib/html.js';
+import { SCREEN } from '../lib/state.js';
 
 export function renderReturnParcel(root, ctx) {
   var inquiry = ctx.state.inquiry;
@@ -9,7 +10,7 @@ export function renderReturnParcel(root, ctx) {
     '  <p>IPR: ' + escapeHtml(inquiry.iprBarcode) + '</p>' +
     '  <p>운송장번호를 스캔해주세요.</p>' +
     '  <input id="trackingInput" class="hid-input" type="text" autocomplete="off" style="opacity:1;position:static;width:100%;height:auto;padding:10px;border:1px solid var(--line);border-radius:12px;" />' +
-    '  <button id="returnParcelCancel" class="btn btn-secondary" type="button">취소</button>' +
+    '  <button id="returnParcelCancel" class="btn btn-secondary" type="button">뒤로가기</button>' +
     '</div>';
 
   var trackingInput = root.querySelector('#trackingInput');
@@ -29,6 +30,6 @@ export function renderReturnParcel(root, ctx) {
   });
 
   root.querySelector('#returnParcelCancel').addEventListener('click', function () {
-    ctx.dispatch({ type: 'RESET_TO_SCAN' });
+    ctx.dispatch({ type: 'GO_BACK', screen: SCREEN.RETURN_METHOD_CHOICE });
   });
 }

@@ -1,4 +1,5 @@
 import { escapeHtml } from '../lib/html.js';
+import { SCREEN } from '../lib/state.js';
 
 export function renderDiscard(root, ctx) {
   var inquiry = ctx.state.inquiry;
@@ -10,7 +11,7 @@ export function renderDiscard(root, ctx) {
     '  <input id="photoInput" type="file" accept="image/*" capture="environment" />' +
     '  <img id="photoPreview" style="display:none" />' +
     '  <button id="discardComplete" class="btn btn-discard" type="button" disabled>폐기처리 완료</button>' +
-    '  <button id="discardCancel" class="btn btn-secondary" type="button">취소</button>' +
+    '  <button id="discardCancel" class="btn btn-secondary" type="button">뒤로가기</button>' +
     '</div>';
 
   var photoBase64 = null;
@@ -48,7 +49,7 @@ export function renderDiscard(root, ctx) {
   });
 
   root.querySelector('#discardCancel').addEventListener('click', function () {
-    ctx.dispatch({ type: 'RESET_TO_SCAN' });
+    ctx.dispatch({ type: 'GO_BACK', screen: SCREEN.SCAN });
   });
 }
 
