@@ -22,6 +22,15 @@ function getLogSheet_() {
   return sheet;
 }
 
+// 오프라인 스냅샷용: A~T(20개 열, buildInquiryResult가 쓰는 마지막 열인 FINAL_STATUS까지)만 읽는다.
+// 미처리 여부 판정과 필드 구성은 호출부(Handlers.gs)에서 buildInquiryResult로 처리한다.
+function readUnprocessedSnapshotRows_() {
+  var sheet = getReturnListSheet_();
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  return sheet.getRange(2, 1, lastRow - 1, 20).getValues();
+}
+
 // IPR(F열) 한 개 열만 읽어서 매칭 행을 찾는다. 시트가 수천 행/수십 열일 때
 // 매 요청마다 전체 행을 통째로 읽으면 응답이 느려지므로, 매칭 단계는 이 얇은
 // 열 하나만 읽고, 실제로 매칭된 행 하나만 readFullRow_()로 나머지 값을 가져온다.
@@ -51,4 +60,15 @@ function writeProcessResult_(rowIndex, update) {
 
 function appendLogRow_(rowValues) {
   getLogSheet_().appendRow(rowValues);
+}
+
+// AC열(중복/재신고 점검)에 "중복스캔"을 추가한다. 기존 내용이 있으면 지우지 않고 이어붙인다.
+function markDuplicateScan_(rowIndex) {
+  var sheet = getReturnListSheet_();
+  var sheetRow = rowIndex + 2;
+  var cell = sheet.getRange(sheetRow, COLUMNS.DUPLICATE_CHECK + 1);
+  var current = String(cell.getValue() || '').trim();
+  if (current.indexOf('중복스캔') === -1) {
+    cell.setValue(current === '' ? '중복스캔' : current + ' / 중복스캔');
+  }
 }
