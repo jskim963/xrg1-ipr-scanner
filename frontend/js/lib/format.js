@@ -28,3 +28,16 @@ export function splitBarcodeSuffix(barcode, suffixLength) {
   }
   return { prefix: str.slice(0, str.length - len), suffix: str.slice(str.length - len) };
 }
+
+export function formatRelativeMinutes(isoString, nowMs) {
+  if (!isoString) return null;
+  var now = nowMs == null ? Date.now() : nowMs;
+  var diffMs = now - new Date(isoString).getTime();
+  var minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return '방금 전';
+  if (minutes < 60) return minutes + '분 전';
+  var hours = Math.floor(minutes / 60);
+  if (hours < 24) return hours + '시간 전';
+  var days = Math.floor(hours / 24);
+  return days + '일 전';
+}

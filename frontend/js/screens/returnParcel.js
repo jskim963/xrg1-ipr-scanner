@@ -20,7 +20,7 @@ export function renderReturnParcel(root, ctx) {
     submitted = true;
     ctx.sync.processReturnParcel(inquiry.iprBarcode, value, ctx.state.worker).then(function (res) {
       if (res.success) {
-        var suffix = res.offline ? ' (오프라인 처리 — 동기화 대기 중)' : '';
+        var suffix = ' (동기화 대기 중 — 아직 서버에 반영되지 않음)';
         ctx.dispatch({ type: 'PROCESS_SUCCESS', text: '택배 회송 처리가 완료되었습니다. (운송장: ' + value + ')' + suffix });
       } else {
         submitted = false;

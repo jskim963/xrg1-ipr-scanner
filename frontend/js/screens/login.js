@@ -16,8 +16,5 @@ export function renderLogin(root, ctx) {
       return;
     }
     ctx.dispatch({ type: 'LOGIN_SUCCESS', worker: { name: name, vfId: vfId } });
-    ctx.sync.downloadSnapshot().catch(function () {
-      ctx.dispatch({ type: 'PROCESS_ERROR', text: '오프라인 데이터 다운로드에 실패했습니다. 온라인 상태에서 다시 로그인해주세요.' });
-    });
   });
 }

@@ -3,21 +3,6 @@ function doPost(e) {
   try {
     var payload = JSON.parse(e.postData.contents);
     switch (payload.action) {
-      case 'inquiry':
-        result = handleInquiry(payload);
-        break;
-      case 'processDiscard':
-        result = handleProcessDiscard(payload);
-        break;
-      case 'processReturnVendor':
-        result = handleProcessReturnVendor(payload);
-        break;
-      case 'processReturnParcel':
-        result = handleProcessReturnParcel(payload);
-        break;
-      case 'processReturnZoneMove':
-        result = handleProcessReturnZoneMove(payload);
-        break;
       case 'syncDown':
         result = handleSyncDown(payload);
         break;

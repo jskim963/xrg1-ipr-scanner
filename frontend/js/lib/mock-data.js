@@ -20,11 +20,6 @@ export var MOCK_ROWS = {
 export function mockCall(action, payload) {
   return new Promise(function (resolve) {
     setTimeout(function () {
-      if (action === 'inquiry') {
-        var row = MOCK_ROWS[payload.iprBarcode];
-        resolve(row ? Object.assign({ success: true }, row) : { success: true, found: false });
-        return;
-      }
       if (action === 'syncDown') {
         var items = Object.keys(MOCK_ROWS)
           .map(function (key) { return MOCK_ROWS[key]; })
@@ -39,7 +34,7 @@ export function mockCall(action, payload) {
         resolve({ success: true, results: results });
         return;
       }
-      resolve({ success: true });
+      resolve({ success: false, error: 'UNKNOWN_ACTION' });
     }, 200);
   });
 }

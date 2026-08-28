@@ -1,4 +1,3 @@
-import { buildInquiryPayload, buildDiscardPayload, buildReturnVendorPayload, buildReturnParcelPayload, buildReturnZoneMovePayload } from './lib/api-payloads.js';
 import { mockCall } from './lib/mock-data.js';
 
 export var MOCK_MODE = true; // 실배포 전 false로 바꾸고 아래 URL을 실제 배포 URL로 교체
@@ -13,21 +12,6 @@ function callApi(action, payload) {
   }).then(function (res) { return res.json(); });
 }
 
-export function inquiry(iprBarcode) {
-  return callApi('inquiry', buildInquiryPayload(iprBarcode));
-}
-export function processDiscard(iprBarcode, worker, photoBase64) {
-  return callApi('processDiscard', buildDiscardPayload(iprBarcode, worker, photoBase64));
-}
-export function processReturnVendor(iprBarcode, worker) {
-  return callApi('processReturnVendor', buildReturnVendorPayload(iprBarcode, worker));
-}
-export function processReturnParcel(iprBarcode, trackingNo, worker) {
-  return callApi('processReturnParcel', buildReturnParcelPayload(iprBarcode, trackingNo, worker));
-}
-export function processReturnZoneMove(iprBarcode, worker) {
-  return callApi('processReturnZoneMove', buildReturnZoneMovePayload(iprBarcode, worker));
-}
 export function syncDown() {
   return callApi('syncDown', {});
 }

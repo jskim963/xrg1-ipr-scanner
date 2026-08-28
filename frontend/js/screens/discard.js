@@ -39,7 +39,7 @@ export function renderDiscard(root, ctx) {
     root.querySelector('#discardComplete').disabled = true;
     ctx.sync.processDiscard(inquiry.iprBarcode, ctx.state.worker, photoBase64).then(function (res) {
       if (res.success) {
-        var suffix = res.offline ? ' (오프라인 처리 — 동기화 대기 중)' : '';
+        var suffix = ' (동기화 대기 중 — 아직 서버에 반영되지 않음)';
         ctx.dispatch({ type: 'PROCESS_SUCCESS', text: 'D+6 폐기 처리가 완료되었습니다.' + suffix });
       } else {
         root.querySelector('#discardComplete').disabled = false;

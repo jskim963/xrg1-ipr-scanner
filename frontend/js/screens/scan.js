@@ -1,5 +1,5 @@
 import { attachHidScanner } from '../scanner.js';
-import { formatDateDisplay, formatDPlus6Badge, formatMethodLabel, splitBarcodeSuffix } from '../lib/format.js';
+import { formatDateDisplay, formatDPlus6Badge, formatMethodLabel, splitBarcodeSuffix, formatRelativeMinutes } from '../lib/format.js';
 import { escapeHtml } from '../lib/html.js';
 
 export function renderScan(root, ctx) {
@@ -10,6 +10,7 @@ export function renderScan(root, ctx) {
     '<div class="scan-panel">' +
     '  <div class="sync-bar">' +
     '    <span id="pendingCount">동기화 대기: 확인 중...</span>' +
+    '    <span id="lastSyncedAt">' + escapeHtml(formatLastSyncedLabel_(ctx.sync.getLastSyncedAt())) + '</span>' +
     '    <button id="refreshSnapshotBtn" class="btn btn-secondary" type="button">데이터 새로고침</button>' +
     '    <button id="syncNowBtn" class="btn btn-secondary" type="button">지금 동기화</button>' +
     '  </div>' +
@@ -102,7 +103,16 @@ function refreshPendingCount_(root, ctx) {
     if (requestId !== latestPendingCountRequestId_) return;
     var el = root.querySelector('#pendingCount');
     if (el) el.textContent = '동기화 대기: ' + count + '건';
+  }).catch(function () {
+    if (requestId !== latestPendingCountRequestId_) return;
+    var el = root.querySelector('#pendingCount');
+    if (el) el.textContent = '동기화 대기: 확인 실패';
   });
+}
+
+function formatLastSyncedLabel_(lastSyncedIso) {
+  var rel = formatRelativeMinutes(lastSyncedIso, Date.now());
+  return rel ? '마지막 새로고침: ' + rel : '새로고침 필요';
 }
 
 function renderInquiryCard_(inquiry) {
