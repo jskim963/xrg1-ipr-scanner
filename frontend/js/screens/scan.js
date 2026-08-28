@@ -15,7 +15,7 @@ export function renderScan(root, ctx) {
     '    <button id="syncNowBtn" class="btn btn-secondary" type="button">지금 동기화</button>' +
     '  </div>' +
     '  <div class="scanner-lcd">IPR SCAN LOG&#10;IPR바코드를 스캔해주세요</div>' +
-    '  <input id="hidInput" class="hid-input" type="text" autocomplete="off" />' +
+    '  <input id="hidInput" class="hid-input" type="text" autocomplete="off" inputmode="none" />' +
     '  <div class="manual-input-row">' +
     '    <input id="manualInput" type="text" autocomplete="off" placeholder="IPR바코드 직접 입력" />' +
     '    <button id="manualSubmit" class="btn btn-secondary" type="button">조회</button>' +
