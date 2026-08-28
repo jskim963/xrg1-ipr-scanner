@@ -12,6 +12,7 @@ export function renderScan(root, ctx) {
     '  <div class="sync-bar">' +
     '    <span id="pendingCount">동기화 대기: 확인 중...</span>' +
     '    <span id="lastSyncedAt">' + escapeHtml(formatLastSyncedLabel_(ctx.sync.getLastSyncedAt())) + '</span>' +
+    '    <span id="clipboardDebug" style="color:var(--danger,#c00);"></span>' +
     '    <button id="refreshSnapshotBtn" class="btn btn-secondary" type="button">데이터 새로고침</button>' +
     '    <button id="syncNowBtn" class="btn btn-secondary" type="button">지금 동기화</button>' +
     '  </div>' +
@@ -130,14 +131,17 @@ function startClipboardWatcher_(ctx) {
   clipboardPollTimer_ = setInterval(function () {
     if (ctx.state.screen !== SCREEN.SCAN) return;
     navigator.clipboard.readText().then(function (text) {
+      var el = document.getElementById('clipboardDebug');
+      if (el) el.textContent = '';
       var value = text.trim();
       if (value && value !== lastClipboardValue_) {
         lastClipboardValue_ = value;
         handleScan_(value, ctx);
       }
-    }).catch(function () {
-      // 클립보드 읽기 권한이 아직 없거나(최초 1회 [붙여넣기] 버튼으로 허용 필요) 문서
-      // 포커스가 없는 경우 - 다음 폴링에서 다시 시도한다.
+    }).catch(function (err) {
+      // 진단용: 실제 어떤 이유로 실패하는지 화면에 잠깐 보여준다(권한 미허용/포커스 없음 등).
+      var el = document.getElementById('clipboardDebug');
+      if (el) el.textContent = '(자동감지 실패: ' + (err && err.name) + ')';
     });
   }, 700);
 }
