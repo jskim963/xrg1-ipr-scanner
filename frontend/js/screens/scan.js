@@ -1,6 +1,7 @@
 import { attachHidScanner } from '../scanner.js';
 import { formatDateDisplay, formatDPlus6Badge, formatMethodLabel, splitBarcodeSuffix, formatRelativeMinutes } from '../lib/format.js';
 import { escapeHtml } from '../lib/html.js';
+import { SCREEN } from '../lib/state.js';
 
 export function renderScan(root, ctx) {
   var inquiry = ctx.state.inquiry;
@@ -78,11 +79,16 @@ export function renderScan(root, ctx) {
     }
     navigator.clipboard.readText().then(function (text) {
       var value = text.trim();
-      if (value) handleScan_(value, ctx);
+      if (value) {
+        lastClipboardValue_ = value;
+        handleScan_(value, ctx);
+      }
     }).catch(function () {
       ctx.dispatch({ type: 'PROCESS_ERROR', text: '클립보드를 읽을 수 없습니다. 스캐너 설정을 확인해주세요.' });
     });
   });
+
+  startClipboardWatcher_(ctx);
 
   root.querySelector('#cameraBtn').addEventListener('click', function () {
     var video = root.querySelector('#scanVideo');
@@ -110,6 +116,31 @@ export function renderScan(root, ctx) {
 // 끝나면 방금 동기화로 갱신된 최신 값을 오래된 값으로 덮어쓸 수 있다. 매 호출마다
 // 토큰을 새로 발급해, 가장 마지막으로 시작된 요청의 결과만 반영되게 한다.
 var latestPendingCountRequestId_ = 0;
+
+// 일부 PDA(예: Bluebird EF501R)의 스캐너는 이 웹뷰의 어떤 입력창에도 키보드 입력을
+// 넣지 못하고 클립보드에만 값을 남긴다. "클립보드 변경 감지" 표준 이벤트가 없어서
+// 주기적으로 읽어보는 방식으로 대체한다. 화면이 다시 그려질 때마다 새로 호출되므로
+// 이전 타이머를 반드시 정리해 중복 폴링이 쌓이지 않게 한다.
+var clipboardPollTimer_ = null;
+var lastClipboardValue_ = null;
+
+function startClipboardWatcher_(ctx) {
+  if (clipboardPollTimer_) clearInterval(clipboardPollTimer_);
+  if (!navigator.clipboard || !navigator.clipboard.readText) return;
+  clipboardPollTimer_ = setInterval(function () {
+    if (ctx.state.screen !== SCREEN.SCAN) return;
+    navigator.clipboard.readText().then(function (text) {
+      var value = text.trim();
+      if (value && value !== lastClipboardValue_) {
+        lastClipboardValue_ = value;
+        handleScan_(value, ctx);
+      }
+    }).catch(function () {
+      // 클립보드 읽기 권한이 아직 없거나(최초 1회 [붙여넣기] 버튼으로 허용 필요) 문서
+      // 포커스가 없는 경우 - 다음 폴링에서 다시 시도한다.
+    });
+  }, 700);
+}
 
 function refreshPendingCount_(root, ctx) {
   var requestId = ++latestPendingCountRequestId_;
