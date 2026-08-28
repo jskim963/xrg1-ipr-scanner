@@ -19,6 +19,7 @@ export function renderScan(root, ctx) {
     '  <div class="manual-input-row">' +
     '    <input id="manualInput" type="text" autocomplete="off" placeholder="IPR바코드 직접 입력" />' +
     '    <button id="manualSubmit" class="btn btn-secondary" type="button">조회</button>' +
+    '    <button id="pasteBtn" class="btn btn-secondary" type="button">붙여넣기</button>' +
     '  </div>' +
     '  <button id="cameraBtn" class="btn btn-secondary" type="button">카메라로 스캔</button>' +
     '  <video id="scanVideo" class="scan-video" playsinline muted style="display:none"></video>' +
@@ -68,6 +69,19 @@ export function renderScan(root, ctx) {
       evt.preventDefault();
       submitManual();
     }
+  });
+
+  root.querySelector('#pasteBtn').addEventListener('click', function () {
+    if (!navigator.clipboard || !navigator.clipboard.readText) {
+      ctx.dispatch({ type: 'PROCESS_ERROR', text: '이 브라우저에서는 클립보드 붙여넣기를 지원하지 않습니다.' });
+      return;
+    }
+    navigator.clipboard.readText().then(function (text) {
+      var value = text.trim();
+      if (value) handleScan_(value, ctx);
+    }).catch(function () {
+      ctx.dispatch({ type: 'PROCESS_ERROR', text: '클립보드를 읽을 수 없습니다. 스캐너 설정을 확인해주세요.' });
+    });
   });
 
   root.querySelector('#cameraBtn').addEventListener('click', function () {
