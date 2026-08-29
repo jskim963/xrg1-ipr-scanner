@@ -1,6 +1,5 @@
 import { attachHidScanner } from '../scanner.js';
 import { escapeHtml } from '../lib/html.js';
-import { SCREEN } from '../lib/state.js';
 
 export function renderReturnParcel(root, ctx) {
   var inquiry = ctx.state.inquiry;
@@ -30,6 +29,6 @@ export function renderReturnParcel(root, ctx) {
   });
 
   root.querySelector('#returnParcelCancel').addEventListener('click', function () {
-    ctx.dispatch({ type: 'GO_BACK', screen: SCREEN.RETURN_METHOD_CHOICE });
+    window.history.back();
   });
 }

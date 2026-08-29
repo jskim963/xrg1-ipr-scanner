@@ -1,5 +1,4 @@
 import { escapeHtml } from '../lib/html.js';
-import { SCREEN } from '../lib/state.js';
 
 export function renderReturnMethodChoice(root, ctx) {
   var inquiry = ctx.state.inquiry;
@@ -22,6 +21,6 @@ export function renderReturnMethodChoice(root, ctx) {
     ctx.dispatch({ type: 'CHOOSE_RETURN_METHOD', route: 'parcel' });
   });
   root.querySelector('#returnMethodCancel').addEventListener('click', function () {
-    ctx.dispatch({ type: 'GO_BACK', screen: SCREEN.SCAN });
+    window.history.back();
   });
 }

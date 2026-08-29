@@ -1,5 +1,4 @@
 import { escapeHtml } from '../lib/html.js';
-import { SCREEN } from '../lib/state.js';
 
 export function renderReturnVendor(root, ctx) {
   var inquiry = ctx.state.inquiry;
@@ -67,6 +66,6 @@ export function renderReturnVendor(root, ctx) {
 
   root.querySelector('#returnVendorBack').addEventListener('click', function () {
     if (actionInFlight) return;
-    ctx.dispatch({ type: 'GO_BACK', screen: SCREEN.RETURN_METHOD_CHOICE });
+    window.history.back();
   });
 }

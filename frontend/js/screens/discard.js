@@ -1,5 +1,4 @@
 import { escapeHtml } from '../lib/html.js';
-import { SCREEN } from '../lib/state.js';
 
 export function renderDiscard(root, ctx) {
   var inquiry = ctx.state.inquiry;
@@ -49,7 +48,7 @@ export function renderDiscard(root, ctx) {
   });
 
   root.querySelector('#discardCancel').addEventListener('click', function () {
-    ctx.dispatch({ type: 'GO_BACK', screen: SCREEN.SCAN });
+    window.history.back();
   });
 }
 
